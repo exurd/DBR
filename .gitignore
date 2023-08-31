@@ -1,3 +1,18 @@
+# DBR cache files
+DBR_Cache/
+DBR_Cache.7z
+
+# Draft Markdown files
+markdown_drafts/
+
+# Text files (in root)
+/*.txt
+
+# Test script
+testscript.py
+
+# Github Python .gitignore as follows:
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
