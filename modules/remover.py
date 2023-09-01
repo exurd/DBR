@@ -6,6 +6,15 @@ from pathlib import PurePosixPath
 import time
 import json
 import concurrent.futures
+import threading
+import sys
+
+print_lock = threading.Lock()
+#list_lock = threading.Lock()
+
+def print_thread_safe(message):
+    with print_lock:
+        print(message)
 
 def get_data_file_path():
     data_folder = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir), "DBR_Cache") # places cache folder in root of project
@@ -30,11 +39,16 @@ def save_data(data, filename):
 
 # load data of json files
 checked_places = load_data("checked_places.json")
-checked_badges = load_data("checked_badges.json")
+#checked_badges = load_data("checked_badges.json")
 
-load_dotenv() # place .env in the root of the project. "ROBLOXTOKEN=[.ROBLOSECURITY TOKEN HERE]". if unsure, then that's great! please leave. these kinds of things are not for the faint of heart.
+# def append_to_checked_badges(item):
+#     with list_lock:
+#         checked_badges.append(item)
+
+load_dotenv() # place .env in the root of the project. not in the modules folder!!
 
 user_id = int(os.getenv("USERID"))
+NUM_THREADS = int(os.getenv("NUMTHREADS"))
 
 requestSession = requests.Session() # initiate a session
 adapter = requests.adapters.HTTPAdapter(max_retries=5)
@@ -52,6 +66,7 @@ def validate_CSRF():
 validate_CSRF()
 
 def delete_badge(badge_id):
+    print_thread_safe("Deleting badge " + str(badge_id) + " from account...")
     attempts = 0
     while attempts < 3:
         url = f"https://badges.roblox.com/v1/user/badges/{str(badge_id)}"
@@ -60,21 +75,23 @@ def delete_badge(badge_id):
         response = requestSession.delete(url)
 
         if response.status_code == 200:
-            print("Badge", badge_id, "was succesfully removed.")
+            print_thread_safe(f"Badge {badge_id} was succesfully removed.")
             attempts = 3
+            time.sleep(.75)
         elif response.status_code == 404:
-            print("Badge", badge_id, "is invalid or does not exist.")
+            print_thread_safe(f"Badge {badge_id} is invalid or does not exist.")
             attempts = 3
+            time.sleep(.75)
         elif response.status_code == 403:
-            print("Token Validation Failed. Re-validating...")
+            print_thread_safe("Token Validation Failed. Re-validating...")
             time.sleep(5)
             validate_CSRF()
         elif response.status_code == 401:
-            print("Authorization has been denied for this request.")
+            print_thread_safe("Authorization has been denied for this request.")
             time.sleep(5)
         else:
-            print("Badge removal failed.")
-            print("Response:", response.status_code, response.text)
+            print_thread_safe("Badge removal failed.")
+            print_thread_safe(f"Response: {response.status_code}, {response.text}")
             time.sleep(5)
         # except ConnectionError:
         #     print("Connection Error! Attempting to retry...")
@@ -99,29 +116,30 @@ def delete_from_game(placeId):
 
             #print(universe_json)
             pageCount = 0
-            badgeCount = 0
             while True:
                 nobadgestoremove = False
-                badge_list = []
+                badge_check_list = []
                 pageCount += 1
                 print("Checking badges on page", str(pageCount) + "...")
                 for badge in universe_json['data']:
                     badgeId = badge['id']
-                    if badgeId in checked_badges:
-                        print("Badge", str(badgeId),  "already checked, skipping...")
-                        continue
-                    else:
-                        badge_list.append(str(badgeId))
+                    # if badgeId in checked_badges:
+                    #     print("Badge", str(badgeId),  "already checked, skipping...")
+                    #     continue
+                    # else:
+                    badge_check_list.append(str(badgeId))
 
-                if badge_list == []:
+                if badge_check_list == []:
                     nobadgestoremove = True
                 else:
                     while True:
-                        badge_check = requestSession.get(f"https://badges.roblox.com/v1/users/{str(user_id)}/badges/awarded-dates?badgeIds={', '.join(badge_list)}") # shows awarded badges en masse; easy!
+                        badge_check = requestSession.get(f"https://badges.roblox.com/v1/users/{str(user_id)}/badges/awarded-dates?badgeIds={', '.join(badge_check_list)}") # shows awarded badges en masse; easy!
                         if badge_check.ok:
                             badge_check = badge_check.json()
                             break
                         time.sleep(3)
+                    if badge_check['data'] == []:
+                        nobadgestoremove = True
 
                 #print(badge_check['data'])
                 
@@ -130,30 +148,34 @@ def delete_from_game(placeId):
 
 
                 if nobadgestoremove == False:
+                    badge_delete_list = []
                     for badge in badge_check['data']:
-                        badgeCount += 1
                         badgeId = badge['badgeId']
-                        if badgeId in checked_badges:
-                            print("Badge in checked_badges.json, skipping...")
-                            continue
-                        else:
-                            
-                            #user_check = requestSession.get(f"https://inventory.roblox.com/v1/users/{str(user_id)}/items/2/{str(badge['id'])}/is-owned")
-                            
-                            #if user_check.text == "true":
-                            print(f"/----||{str(badgeCount)}||----\\")
-                            print("Deleting badge " + str(badge['badgeId']) + " from account...") # you do lose badge names in this method, but it's much faster so it's WORTH IT!
-                            delete_badge(badgeId)
-                            print(f"\\----||{str(badgeCount)}||----/")
+                        # if badgeId in checked_badges:
+                        #     print("Badge in checked_badges.json, skipping...")
+                        #     continue
+                        # else:
+                        badge_delete_list.append(badgeId)
 
-                            # SAVE PROGRESS AFTER, NOT BEFORE DELETION!
-                            checked_badges.append(badgeId)
+                    #user_check = requestSession.get(f"https://inventory.roblox.com/v1/users/{str(user_id)}/items/2/{str(badge['id'])}/is-owned")
+                    
+                    #if user_check.text == "true":
+                    #print("")
+                    
+                    print(f"/----||{str(pageCount)}||----\\")
 
-                            time.sleep(0.35)
+                    #delete_badge(badgeId)
+                    with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
+                        executor.map(delete_badge, badge_delete_list) # i have NO IDEA how the fuck this works, but if i want to go through 2000 games by the next two weeks, this *has* to be implemented.
+                    
+                    print(f"\\----||{str(pageCount)}||----/")
+
+                    print("All badges on the page have been removed.") #print("Executor has killed mapped badges.")
                     #print(universe_json['nextPageCursor'])
-                    print("Saving progress to folder...")
-                    save_data(checked_badges,"checked_badges.json")
-                    print("Saved!")
+                    #print("Saving progress to folder...")
+                    #print(checked_badges) # for some reason threading only gives out []; time to let this feature die
+                    #save_data(checked_badges,"checked_badges.json") # it's for the sake of faster times and besides, it kinda complicated things
+                    #print("Saved!")
                     time.sleep(5)
                 if universe_json['nextPageCursor'] == None:
                     print("Searched all badges.")
@@ -219,16 +241,16 @@ def delete_from_text_file(text_file):
             if check[1] == "badges": # if a badge then use that to check
                 badgeId = int(check[2])
 
-                if badgeId in checked_badges:
-                    print("Badge", str(badgeId),  "already checked, skipping...")
-                    continue
+                # if badgeId in checked_badges:
+                #     print("Badge", str(badgeId),  "already checked, skipping...")
+                #     continue
 
                 user_check = requestSession.get(f"https://inventory.roblox.com/v1/users/{str(user_id)}/items/2/{str(badgeId)}/is-owned")
                 if user_check.text == "true":
                     delete_badge(badgeId)
 
-                checked_badges.append(badgeId)
-                save_data(checked_badges,"checked_badges.json")
+                #checked_badges.append(badgeId)
+                #save_data(checked_badges,"checked_badges.json")
 
             elif check[1] == "games":
                 placeId = int(check[2])

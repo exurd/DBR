@@ -7,3 +7,5 @@ ROBLOXTOKEN="_|THIS-IS-NOT-A-REAL-TOKEN,YOU-MUST-PUT-A-VALID .ROBLOSECURITY TOKE
 USERID=4493410657
 # The User Agent that requests will use. It's best to leave this be.
 USERAGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
+# The number of deleting threads used. This can make the deletion process quicker.
+NUMTHREADS=2
