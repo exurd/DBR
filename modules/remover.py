@@ -5,6 +5,7 @@ from urllib.parse import unquote, urlparse
 from pathlib import PurePosixPath
 import time
 import json
+import concurrent.futures
 
 def get_data_file_path():
     data_folder = os.path.join(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir), "DBR_Cache") # places cache folder in root of project
@@ -31,7 +32,7 @@ def save_data(data, filename):
 checked_places = load_data("checked_places.json")
 checked_badges = load_data("checked_badges.json")
 
-load_dotenv() # place .env in same directory as script. "ROBLOXTOKEN=[.ROBLOSECURITY TOKEN HERE]". if unsure, then that's great! please leave. these kinds of things are not for the faint of heart.
+load_dotenv() # place .env in the root of the project. "ROBLOXTOKEN=[.ROBLOSECURITY TOKEN HERE]". if unsure, then that's great! please leave. these kinds of things are not for the faint of heart.
 
 user_id = int(os.getenv("USERID"))
 

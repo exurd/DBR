@@ -1,3 +1,9 @@
-ROBLOXTOKEN="_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items.|_TUVBVCBHUklOREVS_|THIS-IS-NOT-A-REAL-TOKEN,YOU-MUST-PUT-A-VALID .ROBLOSECURITY TOKEN-IN-FOR-IT-TO-WORK!!!!"
+# The .ROBLOSECURITY token. This is required to delete badges. IT IS NOT UPLOADED TO ANYONE OR USED TO CHANGE ANYTHING ABOUT YOUR ACCOUNT OTHER THAN DELETING BADGES.
+# DO NOT SHARE THE .ENV FILE TO OTHERS ONCE YOU HAVE PUT YOUR TOKEN IN. DOING SO WILL LEAD TO HACKERS STEALING YOUR ACCOUNT!
+# IF YOU ACCIDENTALLY LEAK YOUR TOKEN, YOU MUST LOG OUT AS SOON AS POSSIBLE TO INVALIATE THE TOKEN.
+# If unsure, please check https://ro.py.jmk.gg/dev/roblosecurity/ for more info.
+ROBLOXTOKEN="_|THIS-IS-NOT-A-REAL-TOKEN,YOU-MUST-PUT-A-VALID .ROBLOSECURITY TOKEN-IN-FOR-IT-TO-WORK!!!!|_TUVBVCBHUklOREVS"
+# The Roblox User ID. This is required to check what badges you have collected in a game.
 USERID=4493410657
+# The User Agent that requests will use. It's best to leave this be.
 USERAGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
