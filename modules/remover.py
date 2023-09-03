@@ -230,6 +230,49 @@ def delete_from_player(userId):
     else:
         print("Error! [", playerReq, "]")
         #continue
+
+def delete_from_group(groupId):
+    print("Finding group", str(groupId) + "...")
+    groupReq = requestSession.get(f"https://games.roblox.com/v2/groups/{groupId}/games?accessFilter=2&limit=100&sortOrder=Asc") # gamesV2 only shows 100 games; no page cursor in the api appears. using original
+    #print(playerReq)
+    if groupReq.ok:
+        group_json = groupReq.json()
+        print(group_json)
+        if 'errors' in group_json:
+            print("Error in group_json! [", group_json, "]")
+            #continue
+        else:
+            print("Searching group's games...")
+
+            placeCount = 0
+            while True:
+                for game in group_json['data']:
+                    placeCount += 1
+                    print("Checking place", str(placeCount) + "...")
+                    rootPlaceId = game['rootPlace']['id']
+                    if rootPlaceId in checked_places:
+                        print("Already checked place, skipping...")
+                        continue
+                    else:
+                        print("\/\/\/\/\/\/\/")
+                        print("--------------")
+                        delete_from_game(rootPlaceId)
+                        print("--------------")
+                        print("/\/\/\/\/\/\/\\")
+                        checked_places.append(rootPlaceId)
+                        save_data(checked_places,"checked_places.json")
+                        time.sleep(3)
+
+                #print(universe_json['nextPageCursor'])
+                if group_json['nextPageCursor'] == None:
+                    print("Searched all games.")
+                    return
+                else:
+                    print("Checking next page of games...")
+                    time.sleep(3)
+                    group_json = requestSession.get(f"https://games.roblox.com/v2/groups/{groupId}/games?accessFilter=2&limit=100&sortOrder=Asc&cursor={group_json['nextPageCursor']}").json()
+    else:
+        print("Error! [", groupReq, "]")
         
 def delete_from_text_file(text_file):
     with open(text_file, 'r') as file:
