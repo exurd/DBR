@@ -237,7 +237,7 @@ def delete_from_group(groupId):
     #print(playerReq)
     if groupReq.ok:
         group_json = groupReq.json()
-        print(group_json)
+        #print(group_json)
         if 'errors' in group_json:
             print("Error in group_json! [", group_json, "]")
             #continue
