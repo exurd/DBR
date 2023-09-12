@@ -12,6 +12,9 @@ markdown_drafts/
 # Test script
 testscript.py
 
+# MGS invalid json file
+mgs_invalid_games.json
+
 # Github Python .gitignore as follows:
 
 # Byte-compiled / optimized / DLL files

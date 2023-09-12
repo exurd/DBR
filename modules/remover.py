@@ -313,3 +313,25 @@ def delete_from_text_file(text_file):
                 delete_from_player(userId)
 
             time.sleep(3)
+
+def download_mgs_invalid_games(folder=os.getcwd()):
+    json_file = os.path.join(folder + f"/mgs_invalid_games.json")
+    # if os.path.isfile(json_file):
+    #     print("Already downloaded... Not downloading...")
+    #     return None
+    #     #print("not downloading file", universeId, "; already downloaded")
+    # else:
+    print("Downloading MetaGamerScore invalid Roblox games list...")
+    mgsReq = requestSession.get(f"https://metagamerscore.com/api/roblox/invalid_games")
+    if mgsReq.ok:
+        universe_json = mgsReq.json()
+        
+        with open(json_file, "w", encoding="utf-8") as f:
+            json.dump(universe_json, f, ensure_ascii=False, indent=4, sort_keys=True)
+            f.close()
+        
+        print("Success!")
+        return True
+    else:
+        print("Failed to download:", mgsReq.text)
+        return False
