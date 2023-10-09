@@ -210,11 +210,11 @@ def delete_from_player(userId):
                         print("Already checked place, skipping...")
                         continue
                     else:
-                        print("\/\/\/\/\/\/\/")
+                        print("\\/\\/\\/\\/\\/\\/")
                         print("--------------")
                         delete_from_game(rootPlaceId)
                         print("--------------")
-                        print("/\/\/\/\/\/\/\\")
+                        print("/\\/\\/\\/\\/\\")
                         checked_places.append(rootPlaceId)
                         save_data(checked_places,"checked_places.json")
                         time.sleep(3)
@@ -254,11 +254,11 @@ def delete_from_group(groupId):
                         print("Already checked place, skipping...")
                         continue
                     else:
-                        print("\/\/\/\/\/\/\/")
+                        print("\\/\\/\\/\\/\\/\\/")
                         print("--------------")
                         delete_from_game(rootPlaceId)
                         print("--------------")
-                        print("/\/\/\/\/\/\/\\")
+                        print("/\\/\\/\\/\\/\\")
                         checked_places.append(rootPlaceId)
                         save_data(checked_places,"checked_places.json")
                         time.sleep(3)
