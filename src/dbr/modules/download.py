@@ -1,5 +1,7 @@
 import os
 import json
+import re
+
 from .get_request_url import get_request_url
 
 def download_mgs_invalid_games(folder=os.getcwd()):
@@ -21,4 +23,15 @@ def download_mgs_invalid_games(folder=os.getcwd()):
         return True
     else:
         print("Failed to download:", mgsReq.text)
+        return False
+
+
+def get_game_from_mgs_id(mgs_id):
+    HTML_mgs_place_pattern = re.compile(r"<a target=\"_blank\" href=\"https://www\.roblox\.com/games/([0-9]+)\">https://www\.roblox\.com/games/[0-9]+</a>")
+    request = get_request_url(f"https://metagamerscore.com/game/{mgs_id}")
+    if request.ok:
+        check = HTML_mgs_place_pattern.findall(request.text)
+        if check:
+            return check[0]
+    else:
         return False

@@ -68,6 +68,8 @@ def get_parser() -> argparse.ArgumentParser:
                         help="Specify a user ID.")
     parser.add_argument("--group", "-g", "--community", type=int, default=None, metavar="GROUP_ID",
                         help="Specify a group / community ID.")
+    parser.add_argument("--mgs-id", type=int, default=None, metavar="MGS_ID",
+                        help="Specify a MGS ID.")
 
 
     # related to roblox account authentication
@@ -148,10 +150,10 @@ def main(args=None):
     from dbr.modules import data_save
 
     if all(val is None for val in [args.rbx_token, args.env_file]):
-        parser.error("the following arguments are required to continue: --rbx-token or --env-file containing `RBX_TOKEN`.")
+        parser.error("the following arguments are required to continue: --rbx-token or --env-file containing `RBX_TOKEN=`")
 
-    if all(val is None for val in [args.file, args.user, args.group, args.place, args.badge]):
-        parser.error("the following arguments are required to continue: --file, --user, --group, --place or --badge")
+    if all(val is None for val in [args.file, args.user, args.group, args.place, args.badge, args.mgs_id]):
+        parser.error("the following arguments are required to continue: --file, --user, --group, --place, --badge or --mgs-id")
 
     # if requested, download game list from mgs
     from dbr.modules import remover
@@ -162,6 +164,11 @@ def main(args=None):
 
     if args.badge is not None:
         remover.delete_badge(args.badge)
+    if args.mgs_id is not None:
+        from .modules.download import get_game_from_mgs_id
+        place_id = get_game_from_mgs_id(args.mgs_id)
+        if place_id:
+            remover.delete_from_game(place_id)
     if args.place is not None:
         remover.delete_from_game(args.place)
     if args.group is not None:
