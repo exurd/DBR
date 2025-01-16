@@ -1,0 +1,58 @@
+[build-system]
+requires = [
+    "hatchling",
+    "hatch-requirements-txt",
+    "versioningit"
+]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "dbr"
+authors = [
+    { name="exurd", email="7785022+exurd@users.noreply.github.com" },
+]
+keywords = ["roblox", "achievements", "badges", "metagamerscore"]
+description = "Roblox Dumb Badge(s) Remover"
+dynamic = ["version", "dependencies"]
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    # "Topic :: Games/Entertainment",
+    # "Programming Language :: Python :: 3",
+    # "Programming Language :: Python :: 3.6",
+    # "Programming Language :: Python :: 3.7",
+    # "Programming Language :: Python :: 3.8",
+    # "Programming Language :: Python :: 3.9",
+    # "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent"
+]
+
+[project.urls]
+Homepage = "https://github.com/exurd/DBR/"
+Repository = "https://github.com/exurd/DBR.git"
+Issues = "https://github.com/exurd/DBR/issues"
+
+
+[tool.hatch.metadata.hooks.requirements_txt]
+files = ["requirements.txt"]
+
+[tool.hatch.version]
+source = "versioningit"
+
+[tool.hatch.build]
+sources = ["src"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/dbr/**"]
+
+[tool.hatch.build.targets.wheel]
+include = ["src/dbr/**"]

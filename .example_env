@@ -1,11 +1,21 @@
-# The .ROBLOSECURITY token. This is required to delete badges. IT IS NOT UPLOADED TO ANYONE OR USED TO CHANGE ANYTHING ABOUT YOUR ACCOUNT OTHER THAN DELETING BADGES.
-# DO NOT SHARE THE .ENV FILE TO OTHERS ONCE YOU HAVE PUT YOUR TOKEN IN. DOING SO WILL LEAD TO HACKERS STEALING YOUR ACCOUNT!
-# IF YOU ACCIDENTALLY LEAK YOUR TOKEN, YOU MUST LOG OUT AS SOON AS POSSIBLE TO INVALIATE THE TOKEN.
-# If unsure, please check https://ro.py.jmk.gg/dev/roblosecurity/ for more info.
-ROBLOXTOKEN="_|THIS-IS-NOT-A-REAL-TOKEN,YOU-MUST-PUT-A-VALID .ROBLOSECURITY TOKEN-IN-FOR-IT-TO-WORK!!!!|_TUVBVCBHUklOREVS"
-# The Roblox User ID. This is required to check what badges you have collected in a game.
-USERID=4493410657
-# The User Agent that requests will use. It's best to leave this be.
-USERAGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
-# The number of deleting threads used. This can make the deletion process quicker.
-NUMTHREADS=2
+# 1. Copy this file and rename it to ".env" (DO NOT USE THIS FILE AS AN .ENV FILE!)
+# 2. Change the settings below
+# 3. Specify the .env when running the program ("--env-file, -e ENV_FILE")
+#
+# Roblox Token:
+# THIS PROGRAM DOES NOT AUTOMATICALLY GRAB YOUR ROBLOX TOKEN FOR YOU!
+# Be careful on scripts that "automatically" find your token;
+# it takes one backdoor for your account to be stolen!
+#
+# DO NOT SHARE THE .ENV FILE TO OTHERS ONCE YOU HAVE PUT YOUR TOKEN IN.
+# DOING SO WILL LEAD TO HACKERS STEALING YOUR ACCOUNT!
+# IF YOU ACCIDENTALLY LEAK YOUR TOKEN, LOG OUT AS SOON AS POSSIBLE TO
+# INVALIATE THE TOKEN.
+#
+# Info on safely getting your token can be found on this page:
+# https://ro.py.jmk.gg/dev/tutorials/roblosecurity/
+RBX_TOKEN="_|NOTICE:-THIS-IS-NOT-A-REAL-TOKEN.|_dQw4w9WgXcQ"
+
+# Technical stuff below:
+# User Agent:
+USER_AGENT=""
