@@ -25,9 +25,9 @@ def download_mgs_invalid_games(folder=os.getcwd()):
 
         print("Success!")
         return True
-    else:
-        print("Failed to download:", mgs_req.text)
-        return False
+
+    print("Failed to download:", mgs_req.text)
+    return False
 
 
 def get_game_from_mgs_id(mgs_id):

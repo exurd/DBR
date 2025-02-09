@@ -2,11 +2,15 @@
 DBR_Cache/
 DBR_Cache.7z
 
+# badge spam lists
+badge-spam-lists-main/
+
 # Draft Markdown files
 markdown_drafts/
 
 # Text files (in root)
 /*.txt
+/*.txt.zst
 !/requirements.txt
 
 # Test script

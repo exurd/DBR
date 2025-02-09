@@ -81,6 +81,8 @@ def get_parser() -> argparse.ArgumentParser:
     # related to downloading lists
     parser.add_argument("--download-mgs-invalid-list", action="store_true",
                         help="Download MetaGamerScore's list of Roblox games that were detected as problematic. May contain games that are not considered spam, so use with caution.")
+    parser.add_argument("--download-badge-spam-lists", action="store_true",
+    help="Download text files from exurd/badge-spam-lists; a bunch of text files containing place IDs from various Roblox badge chains.")
 
     # misc.
     parser.add_argument("--cache-directory", "-cd", default=os.path.join(base_cache_path, "dbr_cache"),
@@ -120,8 +122,12 @@ def main(args=None):
     print(f"{__prog__} {__version__}\n{__copyright__}\n")
 
     if args.download_mgs_invalid_list:
-        from .modules.download import download_mgs_invalid_games
+        from .modules.metagamerscore import download_mgs_invalid_games
         download_mgs_invalid_games()
+        sys.exit(0)
+    if args.download_badge_spam_lists:
+        from .modules.badge_spam_list import download_spam_lists
+        download_spam_lists()
         sys.exit(0)
 
     user_agent = args.user_agent
@@ -157,7 +163,7 @@ def main(args=None):
     if args.badge is not None:
         remover.delete_badge(args.badge)
     if args.mgs_id is not None:
-        from .modules.download import get_game_from_mgs_id
+        from .modules.metagamerscore import get_game_from_mgs_id
         place_id = get_game_from_mgs_id(args.mgs_id)
         if place_id:
             remover.delete_from_game(place_id)
