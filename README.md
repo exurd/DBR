@@ -4,7 +4,7 @@ Dumb Badge(s) Remover (DBR) is a Python package that removes [Roblox](https://ww
 This is useful you have been invalidated by the scanner on [MetaGamerScore](https://metagamerscore.com/). You can download their list of invalid games through a function.
 
 ## Requirements
-DBR requires [Python 3.11+](https://www.python.org/downloads/) and the required pip packages. You can run `pip install -r requirements.txt` in the project's directory to install the packages.
+DBR runs on [Python 3.11+](https://www.python.org/downloads/). To install the required pip packages, you can run `pip install -r requirements.txt` in the project's directory to install the packages.
 
 ## Installation and Running
 Run `pip install .` to install DBR. To use the program, run `python -m dbr [COMMAND]`. Adding `-h` will give you the full arguments you can use.
