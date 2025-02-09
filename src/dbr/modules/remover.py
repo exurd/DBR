@@ -184,63 +184,65 @@ def delete_from_game(placeId):
             print("Error in uni_json! [", uni_json, "]")
         else:
             universeId = uni_json['universeId']
-            
+
             print("Searching universe's badges...")
             universebadges_req = get_request_url(f"https://badges.roblox.com/v1/universes/{str(universeId)}/badges?limit=100&sortOrder=Asc", requestSession=requestSession)
             if universebadges_req.ok:
                 universebadges_json = universebadges_req.json()
+                if 'data' not in universebadges_json:
+                    print("No data in universebadges_json? Skipping...")
+                    return False
 
-            pageCount = 0
-            while True:
-                nobadgestoremove = False
-                badge_check_list = []
-                pageCount += 1
-                print("Checking badges on page", str(pageCount) + "...")
+                pageCount = 0
+                while True:
+                    nobadgestoremove = False
+                    badge_check_list = []
+                    pageCount += 1
+                    print("Checking badges on page", str(pageCount) + "...")
 
-                for badge in universebadges_json['data']:
-                    badgeId = badge['id']
-                    badge_check_list.append(str(badgeId))
+                    for badge in universebadges_json['data']:
+                        badgeId = badge['id']
+                        badge_check_list.append(str(badgeId))
 
-                if badge_check_list == []:
-                    nobadgestoremove = True
-                else:
-                    while True:
-                        badge_check = get_request_url(f"https://badges.roblox.com/v1/users/{str(user_id)}/badges/awarded-dates?badgeIds={','.join(badge_check_list)}", requestSession=requestSession)  # shows awarded badges en masse; easy!
-                        print(badge_check)
-                        if badge_check.ok:
-                            badge_check = badge_check.json()
-                            break
-                        
-                        time.sleep(3)
-                    if badge_check['data'] == []:
+                    if badge_check_list == []:
                         nobadgestoremove = True
+                    else:
+                        while True:
+                            badge_check = get_request_url(f"https://badges.roblox.com/v1/users/{str(user_id)}/badges/awarded-dates?badgeIds={','.join(badge_check_list)}", requestSession=requestSession)  # shows awarded badges en masse; easy!
+                            print(badge_check)
+                            if badge_check.ok:
+                                badge_check = badge_check.json()
+                                break
+                            time.sleep(3)
+                        if badge_check['data'] == []:
+                            nobadgestoremove = True
 
-                if nobadgestoremove == False:
-                    badge_delete_list = []
-                    for badge in badge_check['data']:
-                        badgeId = badge['badgeId']
-                        badge_delete_list.append(badgeId)
-                    
-                    print(f"|----||{str(pageCount)}||----|")
+                    if nobadgestoremove == False:
+                        badge_delete_list = []
+                        for badge in badge_check['data']:
+                            badgeId = badge['badgeId']
+                            badge_delete_list.append(badgeId)
 
-                    #delete_badge(badgeId)
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
-                        executor.map(delete_badge, badge_delete_list)
-                    
-                    print(f"|----||{str(pageCount)}||----|")
+                        print(f"|----||{str(pageCount)}||----|")
 
-                    print("All badges on the page have been removed.")
-                    time.sleep(5)
-                if universebadges_json['nextPageCursor'] == None:
-                    print("Searched all badges.")
-                    return True
-                else:
-                    print("Checking next page of badges...")
-                    time.sleep(3)
-                    universebadges_json = get_request_url(f"https://badges.roblox.com/v1/universes/{str(universeId)}/badges?limit=100&sortOrder=Asc&cursor={universebadges_json['nextPageCursor']}", requestSession=requestSession).json()
+                        #delete_badge(badgeId)
+                        with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
+                            executor.map(delete_badge, badge_delete_list)
+
+                        print(f"|----||{str(pageCount)}||----|")
+
+                        print("All badges on the page have been removed.")
+                        time.sleep(5)
+                    if universebadges_json['nextPageCursor'] == None:
+                        print("Searched all badges.")
+                        return True
+                    else:
+                        print("Checking next page of badges...")
+                        time.sleep(3)
+                        universebadges_json = get_request_url(f"https://badges.roblox.com/v1/universes/{str(universeId)}/badges?limit=100&sortOrder=Asc&cursor={universebadges_json['nextPageCursor']}", requestSession=requestSession).json()
     else:
         print("Error! [", universeReq, "]")
-        #continue
+        return False
 
 
 def delete_from_player(userId):
