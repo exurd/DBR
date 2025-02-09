@@ -3,14 +3,15 @@ import random
 import math
 import requests
 
-def get_request_url(url, requestSession=None, retry_amount=8, accept_forbidden=False, accept_not_found=True, initial_wait_time=None, cache_results=True) -> requests.Response:
+
+def get_request_url(url, requestSession=None, retry_amount=8, accept_forbidden=False, accept_not_found=True, initial_wait_time=None) -> requests.Response:
     """
     Internal function to request urls.
     """
     if not isinstance(url, str):
         print("getRequestURL: url was not string type, sending None")
         return None
-    
+
     if requestSession is None:
         requestSession = requests.Session()
         adapter = requests.adapters.HTTPAdapter(max_retries=5)
@@ -20,7 +21,7 @@ def get_request_url(url, requestSession=None, retry_amount=8, accept_forbidden=F
     tries = 0
     print(f"Requesting {url}...")
     for _ in range(retry_amount):
-        if not tries == 0:
+        if tries != 0:
             print(f"Attempt {tries}...")
         tries += 1
         try:
@@ -44,15 +45,15 @@ def get_request_url(url, requestSession=None, retry_amount=8, accept_forbidden=F
             print(f"Request failed: {e}")
             return False
         except requests.exceptions.HTTPError:
-            if sc == 403 or sc == 419:  # Forbidden (Roblox sends 403 for some requests that need a CSRF token), Page Expired
+            if sc in (403, 419):  # Forbidden (Roblox sends 403 for some requests that need a CSRF token), Page Expired
                 # print("Token Validation Failed. Re-validating...")
                 # validate_csrf()
                 return False
-            elif sc == 400:
+            if sc == 400:
                 return False  # Bad Request
-            elif sc == 429:  # Too Many Requests
+            if sc == 429:  # Too Many Requests
                 print("Too many requests!")
-            elif sc == 401:  # Unauthorized
+            if sc == 401:  # Unauthorized
                 return None
         except requests.exceptions.RequestException as e:
             print(f"Request failed: {e}")

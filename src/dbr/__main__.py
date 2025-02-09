@@ -1,16 +1,17 @@
 import os
 import sys
 import argparse
-import importlib
+from importlib import metadata
 
 from dotenv import load_dotenv
+
 
 __prog__ = "Dumb Badge(s) Remover"
 __prg__ = "DBR"
 __desc__ = "Removes Roblox badges very quickly"
 try:
-    __version__ = importlib.metadata.version(__package__ or __name__)
-except:
+    __version__ = metadata.version(__package__ or __name__)
+except metadata.PackageNotFoundError:
     __version__ = "dev"  # fallback version
 __author__ = "exurd"
 __copyright__ = "copyright (c) 2025, exurd"
@@ -35,6 +36,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE."""
 
+
 if getattr(sys, "frozen", False):
     base_path = sys._MEIPASS
     base_cache_path = os.path.dirname(sys.executable)
@@ -56,7 +58,6 @@ def get_parser() -> argparse.ArgumentParser:
     version = "%(prog)s " + __version__
     parser.add_argument("--version", action="version", version=version)
 
-
     # related to input
     parser.add_argument("--file", type=argparse.FileType('r'), default=None,
                         help="Filename path with 'https://roblox.com/[TYPE]/[ID]' urls.")
@@ -69,8 +70,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--group", "-g", "--community", type=int, default=None, metavar="GROUP_ID",
                         help="Specify a group / community ID.")
     parser.add_argument("--mgs-id", type=int, default=None, metavar="MGS_ID",
-                        help="Specify a MGS ID.")
-
+                        help="Specify a MetaGamerScore game ID.")
 
     # related to roblox account authentication
     parser.add_argument("--env-file", "-e", default=None,  # type=argparse.FileType("w"),
@@ -78,19 +78,11 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--rbx-token", "-t", default=None,
                         help=".ROBLOSECURITY token. By using this option, you agree that this is your unique token and not anyone else's. DO NOT SHARE YOUR ROBLOX TOKEN WITH ANYONE! More info can be found here: https://ro.py.jmk.gg/dev/tutorials/roblosecurity/")
 
-
-    # parser.add_argument("--seconds", "-s", type=int, default=-1,
-    #                     help="How many seconds before killing the Roblox process. Setting to -1 (default) disables the timer.")
-
-    # parser.add_argument("--verbose", "-v", action="store_true",
-    #                     help="Verbose mode. Prints out things to help with debugging.")
-
-
     # related to downloading lists
     parser.add_argument("--download-mgs-invalid-list", action="store_true",
                         help="Download MetaGamerScore's list of Roblox games that were detected as problematic. May contain games that are not considered spam, so use with caution.")
 
-
+    # misc.
     parser.add_argument("--cache-directory", "-cd", default=os.path.join(base_cache_path, "dbr_cache"),
                         help="The directory where cache data is kept.")
 
@@ -147,7 +139,7 @@ def main(args=None):
             if "USER_AGENT" in data and data["USER_AGENT"] != "":
                 user_agent = data["USER_AGENT"]
 
-    from dbr.modules import data_save
+    from .modules import data_save
 
     if all(val is None for val in [args.rbx_token, args.env_file]):
         parser.error("the following arguments are required to continue: --rbx-token or --env-file containing `RBX_TOKEN=`")
@@ -156,7 +148,7 @@ def main(args=None):
         parser.error("the following arguments are required to continue: --file, --user, --group, --place, --badge or --mgs-id")
 
     # if requested, download game list from mgs
-    from dbr.modules import remover
+    from .modules import remover
     if remover.init(user_agent, rbx_token) is False:
         sys.exit(1)
 

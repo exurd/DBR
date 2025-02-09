@@ -4,6 +4,7 @@ import json
 DATA_FOLDER = None
 CHECKED_PLACES = []
 
+
 def get_data_file_path(root_folder):
     """
     Sets DATA_FOLDER to a specifed root folder.
@@ -16,10 +17,13 @@ def get_data_file_path(root_folder):
 
 
 def load_data(filename):
+    """
+    Load data from a JSON file.
+    """
     data_file_path = os.path.join(DATA_FOLDER, filename)
     print(data_file_path)
     if os.path.exists(data_file_path) and os.path.getsize(data_file_path) > 0:
-        with open(data_file_path, "r") as f:
+        with open(data_file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
             f.close()
     else:
@@ -28,15 +32,18 @@ def load_data(filename):
 
 
 def save_data(data, filename):
+    """
+    Saves data to a JSON file.
+    """
     data_file_path = os.path.join(DATA_FOLDER, filename)
-    with open(data_file_path, "w") as f:
+    with open(data_file_path, "w", encoding="utf-8") as f:
         json.dump(data, f)
         f.close()
 
 
 def init(root_folder):
     """
-    Initialises variables from json files.
+    Initialises variables from JSON files.
     """
     global CHECKED_PLACES
 

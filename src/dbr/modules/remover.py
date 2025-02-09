@@ -1,5 +1,3 @@
-from dotenv import load_dotenv
-import requests
 from urllib.parse import unquote, urlparse
 from pathlib import PurePosixPath
 import time
@@ -8,12 +6,17 @@ import threading
 import math
 import random
 
+import requests
+
 from . import data_save
 from .get_request_url import get_request_url
 
 
 print_lock = threading.Lock()
+
+
 def print_thread_safe(message):
+    """Print messages while using ThreadPoolExecutor."""
     with print_lock:
         print(message)
 
@@ -40,7 +43,7 @@ def get_user_from_token() -> dict:
     return None
 
 
-user_id = None
+USER_ID = None
 
 
 def validate_csrf() -> str:
@@ -56,7 +59,7 @@ def init(user_agent=None, rbx_token=None):
     """
     Initializes the request session with user agent and cookies.
     """
-    global user_id
+    global USER_ID
 
     if user_agent is not None:
         requestSession.headers["User-Agent"] = str(user_agent)
@@ -66,19 +69,19 @@ def init(user_agent=None, rbx_token=None):
     else:
         print("Roblox Token was not specified, exiting.")
         return False
-    
+
     requestSession.headers["X-CSRF-Token"] = validate_csrf()
-    
-    user_id = get_user_from_token()
-    if user_id is not None:
-        user_id = user_id["id"]
+
+    USER_ID = get_user_from_token()
+    if USER_ID is not None:
+        USER_ID = USER_ID["id"]
     else:
         print("The User ID could not be found. Please check if the specified Roblox token is correct. Exiting.")
         return False
     return True
 
 
-def delete_request_url(url, retry_amount=8, accept_forbidden=False, accept_not_found=True, initial_wait_time=None, cache_results=True) -> requests.Response:
+def delete_request_url(url, retry_amount=8, accept_forbidden=False, accept_not_found=True, initial_wait_time=None) -> requests.Response:
     """
     Internal function to HTTP DELETE urls.
     """
@@ -89,7 +92,7 @@ def delete_request_url(url, retry_amount=8, accept_forbidden=False, accept_not_f
     tries = 0
     print(f"Deleting {url}...")
     for _ in range(retry_amount):
-        if not tries == 0:
+        if tries != 0:
             print(f"Attempt {tries}...")
         tries += 1
         try:
@@ -113,7 +116,7 @@ def delete_request_url(url, retry_amount=8, accept_forbidden=False, accept_not_f
             print(f"Request failed: {e}")
             return False
         except requests.exceptions.HTTPError:
-            if sc == 403 or sc == 419:  # Forbidden (Roblox sends 403 for some requests that need a CSRF token), Page Expired
+            if sc in (403, 419):  # Forbidden (Roblox sends 403 for some requests that need a CSRF token), Page Expired
                 print("Token Validation Failed. Re-validating...")
                 # validate_csrf()
             elif sc == 400:
@@ -138,14 +141,20 @@ def delete_request_url(url, retry_amount=8, accept_forbidden=False, accept_not_f
     return False
 
 
-
 def delete_badge(badge_id):
+    """
+    Deletes badge from user's inventory.
+
+    User ID must already be set in order to successfully delete.
+    """
     print_thread_safe("Deleting badge " + str(badge_id) + " from account...")
     attempts = 0
-    while attempts < 3:  # 3 attempts here * 8 attempts in delete_request_url() = 24 total attempts
+
+    # 3 attempts here * 8 attempts in delete_request_url() = 24 total attempts
+    while attempts < 3:
         url = f"https://badges.roblox.com/v1/user/badges/{str(badge_id)}"
 
-        #try:
+        # try:
         response = delete_request_url(url)
 
         if response.status_code == 200:
@@ -174,41 +183,45 @@ def delete_badge(badge_id):
         attempts += 1
 
 
-def delete_from_game(placeId):
-    print("Getting universe from", str(placeId) + "...")
-    universeReq = get_request_url(f"https://apis.roblox.com/universes/v1/places/{str(placeId)}/universe", requestSession=requestSession)
+def delete_from_game(place_id):
+    """
+    Collects badges from a place ID, checks which were awarded to
+    the user and puts any badges through delete_from_badge().
+    """
+    print("Getting universe from", str(place_id) + "...")
+    universe_req = get_request_url(f"https://apis.roblox.com/universes/v1/places/{str(place_id)}/universe", requestSession=requestSession)
 
-    if universeReq.ok:
-        uni_json = universeReq.json()
+    if universe_req.ok:
+        uni_json = universe_req.json()
         if 'errors' in uni_json:
             print("Error in uni_json! [", uni_json, "]")
         else:
-            universeId = uni_json['universeId']
+            universe_id = uni_json['universeId']
 
             print("Searching universe's badges...")
-            universebadges_req = get_request_url(f"https://badges.roblox.com/v1/universes/{str(universeId)}/badges?limit=100&sortOrder=Asc", requestSession=requestSession)
+            universebadges_req = get_request_url(f"https://badges.roblox.com/v1/universes/{str(universe_id)}/badges?limit=100&sortOrder=Asc", requestSession=requestSession)
             if universebadges_req.ok:
                 universebadges_json = universebadges_req.json()
                 if 'data' not in universebadges_json:
                     print("No data in universebadges_json? Skipping...")
                     return False
 
-                pageCount = 0
+                page_count = 0
                 while True:
                     nobadgestoremove = False
                     badge_check_list = []
-                    pageCount += 1
-                    print("Checking badges on page", str(pageCount) + "...")
+                    page_count += 1
+                    print("Checking badges on page", str(page_count) + "...")
 
                     for badge in universebadges_json['data']:
-                        badgeId = badge['id']
-                        badge_check_list.append(str(badgeId))
+                        badge_id = badge['id']
+                        badge_check_list.append(str(badge_id))
 
                     if badge_check_list == []:
                         nobadgestoremove = True
                     else:
                         while True:
-                            badge_check = get_request_url(f"https://badges.roblox.com/v1/users/{str(user_id)}/badges/awarded-dates?badgeIds={','.join(badge_check_list)}", requestSession=requestSession)  # shows awarded badges en masse; easy!
+                            badge_check = get_request_url(f"https://badges.roblox.com/v1/users/{str(USER_ID)}/badges/awarded-dates?badgeIds={','.join(badge_check_list)}", requestSession=requestSession)  # shows awarded badges en masse; easy!
                             print(badge_check)
                             if badge_check.ok:
                                 badge_check = badge_check.json()
@@ -217,149 +230,173 @@ def delete_from_game(placeId):
                         if badge_check['data'] == []:
                             nobadgestoremove = True
 
-                    if nobadgestoremove == False:
+                    if nobadgestoremove is False:
                         badge_delete_list = []
                         for badge in badge_check['data']:
-                            badgeId = badge['badgeId']
-                            badge_delete_list.append(badgeId)
+                            badge_id = badge['badgeId']
+                            badge_delete_list.append(badge_id)
 
-                        print(f"|----||{str(pageCount)}||----|")
+                        print(f"|----||{str(page_count)}||----|")
 
-                        #delete_badge(badgeId)
+                        # delete_badge(badgeId)
                         with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
                             executor.map(delete_badge, badge_delete_list)
 
-                        print(f"|----||{str(pageCount)}||----|")
+                        print(f"|----||{str(page_count)}||----|")
 
                         print("All badges on the page have been removed.")
                         time.sleep(5)
-                    if universebadges_json['nextPageCursor'] == None:
+                    if universebadges_json['nextPageCursor'] is None:
                         print("Searched all badges.")
                         return True
                     else:
                         print("Checking next page of badges...")
                         time.sleep(3)
-                        universebadges_json = get_request_url(f"https://badges.roblox.com/v1/universes/{str(universeId)}/badges?limit=100&sortOrder=Asc&cursor={universebadges_json['nextPageCursor']}", requestSession=requestSession).json()
+                        universebadges_json = get_request_url(f"https://badges.roblox.com/v1/universes/{str(universe_id)}/badges?limit=100&sortOrder=Asc&cursor={universebadges_json['nextPageCursor']}", requestSession=requestSession).json()
     else:
-        print("Error! [", universeReq, "]")
-        return False
+        print("Error! [", universe_req, "]")
+    return False
 
 
-def delete_from_player(userId):
-    print("Finding user", str(userId) + "...")
-    playerReq = get_request_url(f"https://games.roblox.com/v2/users/{userId}/games?limit=50&sortOrder=Asc", requestSession=requestSession)
-    #print(playerReq)
-    if playerReq.ok:
-        game_json = playerReq.json()
+def delete_from_player(player_id):
+    """
+    Checks the inventory of a player for their games,
+    and puts any games found through delete_from_game().
+    """
+    print("Finding user", str(player_id) + "...")
+    player_req = get_request_url(f"https://games.roblox.com/v2/users/{player_id}/games?limit=50&sortOrder=Asc", requestSession=requestSession)
+    # print(playerReq)
+    if player_req.ok:
+        game_json = player_req.json()
         if 'errors' in game_json:
             print("Error in game_json! [", game_json, "]")
-            #continue
+            # continue
         else:
             print("Searching player's games...")
 
-            placeCount = 0
+            place_count = 0
             while True:
                 for game in game_json['data']:
-                    placeCount += 1
-                    print("Checking place", str(placeCount) + "...")
-                    rootPlaceId = game['rootPlace']['id']
-                    if rootPlaceId in data_save.CHECKED_PLACES:
+                    place_count += 1
+                    print("Checking place", str(place_count) + "...")
+
+                    root_place_id = game['rootPlace']['id']
+                    if root_place_id in data_save.CHECKED_PLACES:
                         print("Already checked place, skipping...")
                         continue
-                    else:
-                        print("⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄")
-                        print("--------------")
-                        delete_from_game(rootPlaceId)
-                        print("--------------")
-                        print("^^^^^^^^^^^^^^")
-                        data_save.CHECKED_PLACES.append(rootPlaceId)
-                        data_save.save_data(data_save.CHECKED_PLACES,"checked_places.json")
-                        time.sleep(3)
 
-                #print(universe_json['nextPageCursor'])
-                if game_json['nextPageCursor'] == None:
-                    print("Searched all games.")
-                    return
-                else:
-                    print("Checking next page of games...")
+                    print("⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄")
+                    print("--------------")
+                    delete_from_game(root_place_id)
+                    print("--------------")
+                    print("^^^^^^^^^^^^^^")
+                    data_save.CHECKED_PLACES.append(root_place_id)
+                    data_save.save_data(data_save.CHECKED_PLACES, "checked_places.json")
                     time.sleep(3)
-                    game_json = get_request_url(f"https://games.roblox.com/v2/users/{userId}/games?limit=50&sortOrder=Asc&cursor={game_json['nextPageCursor']}", requestSession=requestSession).json()
-    else:
-        print("Error! [", playerReq, "]")
-        #continue
 
-
-def delete_from_group(groupId):
-    print("Finding group", str(groupId) + "...")
-    groupReq = get_request_url(f"https://games.roblox.com/v2/groups/{groupId}/games?accessFilter=2&limit=100&sortOrder=Asc", requestSession=requestSession) # gamesV2 only shows 100 games; no page cursor in the api appears. using original
-    #print(playerReq)
-    if groupReq.ok:
-        group_json = groupReq.json()
-        #print(group_json)
-        if 'errors' in group_json:
-            print("Error in group_json! [", group_json, "]")
-        else:
-            print("Searching group's games...")
-
-            placeCount = 0
-            while True:
-                for game in group_json['data']:
-                    placeCount += 1
-                    print("Checking place", str(placeCount) + "...")
-                    rootPlaceId = game['rootPlace']['id']
-                    if rootPlaceId in data_save.CHECKED_PLACES:
-                        print("Already checked place, skipping...")
-                        continue
-                    else:
-                        print("⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄")
-                        print("--------------")
-                        delete_from_game(rootPlaceId)
-                        print("--------------")
-                        print("^^^^^^^^^^^^^^")
-                        data_save.CHECKED_PLACES.append(rootPlaceId)
-                        data_save.save_data(data_save.CHECKED_PLACES,"checked_places.json")
-                        time.sleep(3)
-
-                #print(universe_json['nextPageCursor'])
-                if group_json['nextPageCursor'] == None:
+                # print(universe_json['nextPageCursor'])
+                if game_json['nextPageCursor'] is None:
                     print("Searched all games.")
                     return True
                 else:
                     print("Checking next page of games...")
                     time.sleep(3)
-                    group_json = get_request_url(f"https://games.roblox.com/v2/groups/{groupId}/games?accessFilter=2&limit=100&sortOrder=Asc&cursor={group_json['nextPageCursor']}", requestSession=requestSession).json()
+                    game_json = get_request_url(f"https://games.roblox.com/v2/users/{player_id}/games?limit=50&sortOrder=Asc&cursor={game_json['nextPageCursor']}", requestSession=requestSession).json()
     else:
-        print("Error! [", groupReq, "]")
+        print("Error! [", player_req, "]")
+    return False
 
-        
+
+def delete_from_group(group_id):
+    """
+    Checks public game list for a group,
+    and puts any games found through delete_from_game().
+
+    Note the API will not show any private game that is in a group.
+    """
+    print("Finding group", str(group_id) + "...")
+
+    # v2/groups/*/gamesV2 only shows 100 games; no page cursor in the api appears. using original
+    group_req = get_request_url(f"https://games.roblox.com/v2/groups/{group_id}/games?accessFilter=2&limit=100&sortOrder=Asc", requestSession=requestSession)
+    # print(playerReq)
+    if group_req.ok:
+        group_json = group_req.json()
+        # print(group_json)
+        if 'errors' in group_json:
+            print("Error in group_json! [", group_json, "]")
+        else:
+            print("Searching group's games...")
+
+            place_count = 0
+            while True:
+                for game in group_json['data']:
+                    place_count += 1
+                    print("Checking place", str(place_count) + "...")
+                    root_place_id = game['rootPlace']['id']
+                    if root_place_id in data_save.CHECKED_PLACES:
+                        print("Already checked place, skipping...")
+                        continue
+                    else:
+                        print("⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄")
+                        print("--------------")
+                        delete_from_game(root_place_id)
+                        print("--------------")
+                        print("^^^^^^^^^^^^^^")
+                        data_save.CHECKED_PLACES.append(root_place_id)
+                        data_save.save_data(data_save.CHECKED_PLACES, "checked_places.json")
+                        time.sleep(3)
+
+                # print(universe_json['nextPageCursor'])
+                if group_json['nextPageCursor'] is None:
+                    print("Searched all games.")
+                    return True
+                else:
+                    print("Checking next page of games...")
+                    time.sleep(3)
+                    group_json = get_request_url(f"https://games.roblox.com/v2/groups/{group_id}/games?accessFilter=2&limit=100&sortOrder=Asc&cursor={group_json['nextPageCursor']}", requestSession=requestSession).json()
+    else:
+        print("Error! [", group_req, "]")
+    return False
+
+
 def delete_from_text_file(lines):
+    """
+    Accepts a text file with Roblox urls.
+
+    Example:
+    ```
+    https://www.roblox.com/games/123
+    https://www.roblox.com/users/1234
+    https://www.roblox.com/badges/12345
+    ```
+    """
     for line in lines:
         url = line.strip()
-        #print(url)
+        # print(url)
         check = PurePosixPath(unquote(urlparse(url).path)).parts
 
         if check[1] == "badges":  # if a badge then use that to check
-            badgeId = int(check[2])
+            badge_id = int(check[2])
 
-            user_check = get_request_url(f"https://inventory.roblox.com/v1/users/{str(user_id)}/items/2/{str(badgeId)}/is-owned", requestSession=requestSession)
+            user_check = get_request_url(f"https://inventory.roblox.com/v1/users/{str(USER_ID)}/items/2/{str(badge_id)}/is-owned", requestSession=requestSession)
             if user_check.text == "true":
-                delete_badge(badgeId)
+                delete_badge(badge_id)
 
         elif check[1] == "games":
-            placeId = int(check[2])
+            place_id = int(check[2])
 
-            if placeId in data_save.CHECKED_PLACES:
+            if place_id in data_save.CHECKED_PLACES:
                 print("Already checked place, skipping...")
                 continue
 
-            delete_from_game(placeId)
+            delete_from_game(place_id)
 
-            data_save.CHECKED_PLACES.append(placeId)
-            data_save.save_data(data_save.CHECKED_PLACES,"checked_places.json")
+            data_save.CHECKED_PLACES.append(place_id)
+            data_save.save_data(data_save.CHECKED_PLACES, "checked_places.json")
 
         elif check[1] == "users":
-            userId = int(check[2])
-            
-            delete_from_player(userId)
+            player_id = int(check[2])
+
+            delete_from_player(player_id)
 
         time.sleep(3)
