@@ -4,6 +4,23 @@ import io
 
 from .get_request_url import get_request_url
 
+try:
+    import zstandard as zstd
+except ImportError:
+    print("Could not import zstandard python library...")
+
+
+def zstd_extract_lines(filename):
+    """Extracts lines from zstandard file."""
+    try:
+        with zstd.open(filename, mode="r", encoding="utf-8") as f:
+            lines = f.readlines()
+            f.close()
+            return lines
+    except (zstd.ZstdError, OSError) as e:
+        print(f"Error reading file {filename}: {e}")
+        return []
+
 
 def download_spam_lists(folder=os.getcwd()):
     """

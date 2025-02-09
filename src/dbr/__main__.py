@@ -59,7 +59,7 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=version)
 
     # related to input
-    parser.add_argument("--file", type=argparse.FileType('r'), default=None,
+    parser.add_argument("--file", type=str, default=None,
                         help="Filename path with 'https://roblox.com/[TYPE]/[ID]' urls.")
     parser.add_argument("--badge", "-b", type=int, default=None, metavar="BADGE_ID",
                         help="Specify a badge ID.")
@@ -175,10 +175,19 @@ def main(args=None):
         remover.delete_from_player(args.user)
     if args.file is not None:
         lines = []
-        lines = args.file.readlines()
-        args.file.close()
+        try:
+            with open(args.file, mode="r", encoding="utf-8") as f:
+                lines = f.readlines()
+                f.close()
+        except UnicodeDecodeError:
+            if ".txt.zst" in args.file:
+                from .modules.badge_spam_list import zstd_extract_lines
+                lines = zstd_extract_lines(args.file)
+        except OSError as e:
+            parser.error(e)
         if lines == []:
-            parser.error("text file is empty")
+            parser.error("text file is empty or unreadable")
+
         remover.delete_from_text_file(lines)
 
 
