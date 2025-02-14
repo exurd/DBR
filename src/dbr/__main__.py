@@ -4,7 +4,7 @@ import argparse
 from importlib import metadata
 
 from dotenv import load_dotenv
-
+from .modules import data_save
 
 __prog__ = "Dumb Badge(s) Remover"
 __prg__ = "DBR"
@@ -84,6 +84,11 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument("--download-badge-spam-lists", action="store_true",
     help="Download text files from exurd/badge-spam-lists; a bunch of text files containing place IDs from various Roblox badge chains.")
 
+    # related to inventory scanning
+    parser.add_argument("--check-inventory", "-c", type=int, default=None, metavar="USER_ID",
+                        help="Checks a user's inventory for spam badges. DOES NOT DELETE BADGES. "
+                        "Requires a list of place IDs to check (use download arguments above).")
+
     # misc.
     parser.add_argument("--cache-directory", "-cd", default=os.path.join(base_cache_path, "dbr_cache"),
                         help="The directory where cache data is kept.")
@@ -121,6 +126,9 @@ def main(args=None):
 
     print(f"{__prog__} {__version__}\n{__copyright__}\n")
 
+    data_save.init(root_folder=args.cache_directory)
+
+    # if requested, download spam lists
     if args.download_mgs_invalid_list:
         from .modules.metagamerscore import download_mgs_invalid_games
         download_mgs_invalid_games()
@@ -128,6 +136,17 @@ def main(args=None):
     if args.download_badge_spam_lists:
         from .modules.badge_spam_list import download_spam_lists
         download_spam_lists()
+        sys.exit(0)
+
+    if args.check_inventory:
+        from .modules.spam_scanner import create_spam_list, convert_to_frozensets, create_folder, scan_inventory
+        if create_spam_list():
+            create_folder(args.check_inventory)
+            convert_to_frozensets()
+            
+            badges, places = scan_inventory(args.check_inventory)
+            data_save.save_data(list(badges), f"spambadges_{str(args.check_inventory)}.json")
+            data_save.save_data(list(places), f"spamplaces_{str(args.check_inventory)}.json")
         sys.exit(0)
 
     user_agent = args.user_agent
@@ -140,12 +159,9 @@ def main(args=None):
         if rbx_token == parser.get_default("RBX_TOKEN"):
             if "RBX_TOKEN" in data and data["USER_AGENT"] != "":
                 rbx_token = data["RBX_TOKEN"]
-
         if user_agent == parser.get_default("USER_AGENT"):
             if "USER_AGENT" in data and data["USER_AGENT"] != "":
                 user_agent = data["USER_AGENT"]
-
-    from .modules import data_save
 
     if all(val is None for val in [args.rbx_token, args.env_file]):
         parser.error("the following arguments are required to continue: --rbx-token or --env-file containing `RBX_TOKEN=`")
@@ -153,12 +169,9 @@ def main(args=None):
     if all(val is None for val in [args.file, args.user, args.group, args.place, args.badge, args.mgs_id]):
         parser.error("the following arguments are required to continue: --file, --user, --group, --place, --badge or --mgs-id")
 
-    # if requested, download game list from mgs
     from .modules import remover
     if remover.init(user_agent, rbx_token) is False:
         sys.exit(1)
-
-    data_save.init(root_folder=args.cache_directory)
 
     if args.badge is not None:
         remover.delete_badge(args.badge)

@@ -9,7 +9,7 @@ def get_request_url(url, requestSession=None, retry_amount=8, accept_forbidden=F
     Internal function to request urls.
     """
     if not isinstance(url, str):
-        print("getRequestURL: url was not string type, sending None")
+        print(f"get_request_url: url was not string type (instead got {type(url)}), sending None")
         return None
 
     if requestSession is None:

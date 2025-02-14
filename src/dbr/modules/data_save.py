@@ -20,8 +20,10 @@ def load_data(filename):
     """
     Load data from a JSON file.
     """
-    data_file_path = os.path.join(DATA_FOLDER, filename)
-    print(data_file_path)
+    if DATA_FOLDER is None:
+        data_file_path = os.path.join(filename)
+    else:
+        data_file_path = os.path.join(DATA_FOLDER, filename)
     if os.path.exists(data_file_path) and os.path.getsize(data_file_path) > 0:
         with open(data_file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -35,9 +37,13 @@ def save_data(data, filename):
     """
     Saves data to a JSON file.
     """
-    data_file_path = os.path.join(DATA_FOLDER, filename)
+    if DATA_FOLDER is None:
+        data_file_path = os.path.join(filename)
+    else:
+        data_file_path = os.path.join(DATA_FOLDER, filename)
+
     with open(data_file_path, "w", encoding="utf-8") as f:
-        json.dump(data, f)
+        json.dump(data, f, ensure_ascii=False, indent=4, sort_keys=True)
         f.close()
 
 
