@@ -1,7 +1,7 @@
 # Dumb Badge(s) Remover
-Dumb Badge(s) Remover (DBR) is a Python package that removes [Roblox](https://www.roblox.com) badges, specifically any dumb ones that you don't want anymore. It can declutter your badge inventory of Badge chains and other various filler badges.
+Dumb Badge(s) Remover (DBR) is a Python package that removes [Roblox](https://www.roblox.com) badges, specifically any dumb ones that you don't want anymore. It can declutter your badge inventory of Badge chains and other various filler badges. You can also scan your inventory for spam badges without removing any badges.
 
-This is useful you have been invalidated by the scanner on [MetaGamerScore](https://metagamerscore.com/). You can download their list of invalid games through a function.
+This program is useful you have been invalidated by the scanner on [MetaGamerScore](https://metagamerscore.com/). You can download their list of invalid games through a function.
 
 ## Requirements
 DBR runs on [Python 3.11+](https://www.python.org/downloads/). To install the required pip packages, you can run `pip install -r requirements.txt` in the project's directory to install the packages.
@@ -9,45 +9,58 @@ DBR runs on [Python 3.11+](https://www.python.org/downloads/). To install the re
 ## Installation and Running
 Run `pip install .` to install DBR. To use the program, run `python -m dbr [COMMAND]`. Adding `-h` will give you the full arguments you can use.
 ```
-usage: Dumb Badge(s) Remover [-h] [--version] [--file FILE] [--badge BADGE_ID]
-                             [--place PLACE_ID] [--user USER_ID]
-                             [--group GROUP_ID] [--mgs-id MGS_ID]
-                             [--env-file ENV_FILE] [--rbx-token RBX_TOKEN]
+usage: Dumb Badge(s) Remover [-h]
+                             [--version]
+                             [--file FILE]
+                             [--badge BADGE_ID]
+                             [--place PLACE_ID]
+                             [--user USER_ID]
+                             [--group GROUP_ID]
+                             [--mgs-id MGS_ID]
+                             [--env-file ENV_FILE]
+                             [--rbx-token RBX_TOKEN]
                              [--download-mgs-invalid-list]
+                             [--download-badge-spam-lists]
+                             [--check-inventory USER_ID]
                              [--cache-directory CACHE_DIRECTORY]
                              [--user-agent USER_AGENT]
 
 Removes Roblox badges very quickly
 
-There are 12 arguments available.
+There are 14 arguments available.
 
 options:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
-  --file FILE           Filename path with 'https://roblox.com/[TYPE]/[ID]'
-                        urls.
+  --file FILE           Filename path with 'https://roblox.com/[TYPE]/[ID]' urls.
   --badge, -b BADGE_ID  Specify a badge ID.
   --place, -p PLACE_ID  Specify a place ID.
   --user, -u USER_ID    Specify a user ID.
   --group, -g, --community GROUP_ID
                         Specify a group / community ID.
-  --mgs-id MGS_ID       Specify a MGS ID.
+  --mgs-id MGS_ID       Specify a MetaGamerScore game ID.
   --env-file, -e ENV_FILE
                         An .env file allows you to specify settings (the below
                         options) for Dumb Badge(s) Remover to follow without
-                        cluttering the terminal or risking important tokens.
-                        More information on .env files can be found in the
-                        README.
+                        cluttering the terminal or risking important tokens. More
+                        information on .env files can be found in the README.
   --rbx-token, -t RBX_TOKEN
-                        .ROBLOSECURITY token. By using this option, you agree
-                        that this is your unique token and not anyone else's.
-                        DO NOT SHARE YOUR ROBLOX TOKEN WITH ANYONE! More info
-                        can be found here:
-                        https://ro.py.jmk.gg/dev/tutorials/roblosecurity/
+                        .ROBLOSECURITY token. By using this option, you agree that
+                        this is your unique token and not anyone else's. DO NOT
+                        SHARE YOUR ROBLOX TOKEN WITH ANYONE! More info can be found
+                        here: https://ro.py.jmk.gg/dev/tutorials/roblosecurity/
   --download-mgs-invalid-list
-                        Download MetaGamerScore's list of Roblox games that
-                        were detected as problematic. May contain games that
-                        are not considered spam, so use with caution.
+                        Download MetaGamerScore's list of Roblox games that were
+                        detected as problematic. May contain games that are not
+                        considered spam, so use with caution.
+  --download-badge-spam-lists
+                        Download text files from exurd/badge-spam-lists; a bunch of
+                        text files containing place IDs from various Roblox badge
+                        chains.
+  --check-inventory, -c USER_ID
+                        Checks a user's inventory for spam badges. DOES NOT DELETE
+                        BADGES. Requires a list of place IDs to check (use download
+                        arguments above).
   --cache-directory, -cd CACHE_DIRECTORY
                         The directory where cache data is kept.
   --user-agent, -ua USER_AGENT
