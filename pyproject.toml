@@ -16,12 +16,12 @@ keywords = ["roblox", "achievements", "badges", "metagamerscore"]
 description = "Roblox Dumb Badge(s) Remover"
 dynamic = ["version", "dependencies"]
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: MIT License",
     "Topic :: Games/Entertainment",
     "Topic :: Utilities",
     "Programming Language :: Python :: 3",
