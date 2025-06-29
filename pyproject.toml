@@ -36,6 +36,9 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 
+[project.scripts]
+dbr = "dbr.__main__:main"
+
 [project.urls]
 Homepage = "https://github.com/exurd/DBR/"
 Repository = "https://github.com/exurd/DBR.git"
