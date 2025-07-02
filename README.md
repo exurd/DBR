@@ -7,7 +7,9 @@ This program is useful you have been invalidated by the scanner on [MetaGamerSco
 DBR runs on [Python 3.11+](https://www.python.org/downloads/). To install the required pip packages, you can run `pip install -r requirements.txt` in the project's directory to install the packages.
 
 ## Installation and Running
-Run `pip install .` to install DBR. To use the program, run `python -m dbr [COMMAND]`. Adding `-h` will give you the full arguments you can use.
+Install the program with pip by running `pip install git+https://github.com/exurd/dbr`. Other Python package managers are supported, like `pipx install` and `uv pip install`.
+
+To use the program, run `python -m dbr [COMMAND]` or `dbr [COMMAND]`. Adding `-h` will give you the full arguments you can use.
 ```
 usage: Dumb Badge(s) Remover [-h]
                              [--version]
