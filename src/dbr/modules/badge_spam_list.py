@@ -14,7 +14,7 @@ def zstd_extract_lines(filename):
     """Extracts lines from zstandard file."""
     try:
         with zstd.open(filename, mode="r", encoding="utf-8") as f:
-            lines = f.readlines()
+            lines = f.read().splitlines()
             f.close()
             return lines
     except (zstd.ZstdError, OSError) as e:
