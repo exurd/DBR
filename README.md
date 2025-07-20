@@ -34,13 +34,13 @@ There are 14 arguments available.
 options:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
-  --file FILE           Filename path with 'https://roblox.com/[TYPE]/[ID]' urls.
-  --badge, -b BADGE_ID  Specify a badge ID.
-  --place, -p PLACE_ID  Specify a place ID.
-  --user, -u USER_ID    Specify a user ID.
+  --file FILE           Filename path with 'https://roblox.com/[TYPE]/[ID]' urls you want gone from your account.
+  --badge, -b BADGE_ID  Specify a badge ID you want gone from your account.
+  --place, -p PLACE_ID  Specify a place ID you want gone from your account.
+  --user, -u USER_ID    Specify a user ID you want gone from your account.
   --group, -g, --community GROUP_ID
-                        Specify a group / community ID.
-  --mgs-id MGS_ID       Specify a MetaGamerScore game ID.
+                        Specify a group / community ID you want gone from your account.
+  --mgs-id MGS_ID       Specify a MetaGamerScore game ID you want gone from your account.
   --env-file, -e ENV_FILE
                         An .env file allows you to specify settings (the below
                         options) for Dumb Badge(s) Remover to follow without

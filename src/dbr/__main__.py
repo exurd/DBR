@@ -60,17 +60,17 @@ def get_parser() -> argparse.ArgumentParser:
 
     # related to input
     parser.add_argument("--file", type=str, default=None,
-                        help="Filename path with 'https://roblox.com/[TYPE]/[ID]' urls.")
+                        help="Filename path with 'https://roblox.com/[TYPE]/[ID]' urls you want gone from your account.")
     parser.add_argument("--badge", "-b", type=int, default=None, metavar="BADGE_ID",
-                        help="Specify a badge ID.")
+                        help="Specify a badge ID you want gone from your account.")
     parser.add_argument("--place", "-p", type=int, default=None, metavar="PLACE_ID",
-                        help="Specify a place ID.")
+                        help="Specify a place ID you want gone from your account.")
     parser.add_argument("--user", "-u", type=int, default=None, metavar="USER_ID",
-                        help="Specify a user ID.")
+                        help="Specify a user ID you want gone from your account.")
     parser.add_argument("--group", "-g", "--community", type=int, default=None, metavar="GROUP_ID",
-                        help="Specify a group / community ID.")
+                        help="Specify a group / community ID you want gone from your account.")
     parser.add_argument("--mgs-id", type=int, default=None, metavar="MGS_ID",
-                        help="Specify a MetaGamerScore game ID.")
+                        help="Specify a MetaGamerScore game ID you want gone from your account.")
 
     # related to roblox account authentication
     parser.add_argument("--env-file", "-e", default=None,  # type=argparse.FileType("w"),
