@@ -85,6 +85,6 @@ For better safety, you can use .env files to avoid leaks. The `.example_env` in 
 # Downloading lists
 There are two commands for downloading lists for this program; `--download-mgs-invalid-list` and `--download-badge-spam-lists`. The first command downloads a list of games that are considered spam by MetaGamerScore. The other command downloads multiple text files from [exurd/badge-spam-lists](https://github.com/exurd/badge-spam-lists).
 
-To delete badges from games in a text file, use the `--file` command with the path to the file.
+To delete badges from games in a text file, use the `--file` command with the path to the file. Make sure it ends with `.txt` and not `.json`!
 
 *This project has been licensed with the MIT License.*

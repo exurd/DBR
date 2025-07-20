@@ -13,20 +13,31 @@ def download_mgs_invalid_games(folder=os.getcwd()):
     This downloads MGS' list of Roblox games that were detected as problematic.
     May contain games that are not considered spam, so use with caution.
     """
-    json_file = os.path.join(folder + "/mgs_invalid_games.json")
-    print("Downloading MetaGamerScore invalid Roblox games list...")
-    mgs_req = get_request_url("https://metagamerscore.com/api/roblox/invalid_games")
-    if mgs_req.ok:
-        universe_json = mgs_req.json()
+    try:
+        json_file = os.path.join(folder + "/mgs_invalid_games.json")
+        txt_file = os.path.join(folder + "/mgs_invalid_games.txt")
+        print("Downloading MetaGamerScore invalid Roblox games list...")
+        mgs_req = get_request_url("https://metagamerscore.com/api/roblox/invalid_games")
+        if mgs_req.ok:
+            mgs_json = mgs_req.json()
 
-        with open(json_file, "w", encoding="utf-8") as f:
-            json.dump(universe_json, f, ensure_ascii=False, indent=4, sort_keys=True)
-            f.close()
+            if mgs_json:
+                with open(json_file, "w", encoding="utf-8") as f:
+                    json.dump(mgs_json, f, ensure_ascii=False, indent=4, sort_keys=True)
+                    f.close()
 
-        print("Success!")
-        return True
+                if mgs_json["invalid_games"]:
+                    with open(txt_file, "w", encoding="utf-8") as f:
+                        for place_id in mgs_json["invalid_games"]:
+                            f.write(f"https://www.roblox.com/games/{place_id}\n")
+                        f.close()
 
-    print("Failed to download:", mgs_req.text)
+                print("Success!")
+                return True
+    except Exception as e:
+        print(e)
+
+    print("Failed to download list.")
     return False
 
 
