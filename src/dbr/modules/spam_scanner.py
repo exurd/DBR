@@ -1,3 +1,5 @@
+from enum import StrEnum
+from warnings import warn
 import logging
 import os
 import time
@@ -12,14 +14,16 @@ BADGE_SPAM = {}
 FOUND_BADGES = set()
 FOUND_PLACES = set()
 
+class R_Type(StrEnum):
+    BADGE = "badges"
+    PLACE = "games"
 
-def create_folder(user_id):
+
+def create_folder(folder_name):
     """Creates folder for use in spam_scanner"""
     folder = os.path.join(
         data_save.DATA_FOLDER,
-        "scanresults_"
-        f"{str(user_id)}_"
-        f"{str(round(time.time()))}"
+        folder_name
     )
     data_save.init(root_folder=folder)
     os.makedirs((folder + "/badge_inventory"), exist_ok=True)
@@ -114,8 +118,39 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
     """
     global FOUND_BADGES
     global FOUND_PLACES
-    
 
+    if not create_spam_list():
+        print("Could not compile scan list.")
+        return False
+
+    if not convert_to_frozensets():
+        warn("Could not create frozen sets... might take longer to scan")
+
+    timestamp = round(time.time())
+    scanfolder_name = f"scanresults_{str(user_id)}_{str(timestamp)}"
+    create_folder(scanfolder_name)
+
+
+    def _save_lists(id, type, folder=os.getcwd()):
+        """
+        Saves a list of Roblox URLs, which can then
+        be used in DBR to delete the badges from
+        their inventory.
+
+        `folder` is current working directory as users
+        will most likely want to see the results there.
+        """
+        try:
+            filename = os.path.join(folder, f"{scanfolder_name}.txt")
+            with open(filename, "a", encoding="utf-8") as f:
+                f.write(f"https://www.roblox.com/{type}/{str(id)}\n")
+                f.close()
+                return True
+        except Exception as e:
+            print(f"Error! {e}")
+            return False
+            
+    
     pageNum = page_count
     if page_cursor == None:
         url_request = f"https://badges.roblox.com/v1/users/{user_id}/badges?limit=100&sortOrder=Asc"
@@ -133,23 +168,26 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
                 print("Error in uni_json! [", request_json, "]")
                 continue
 
+            # save badge inventory data
+            data_save.save_data(request_json, f"badge_inventory/{user_id}_{pageNum}.json")
+
             for badge_entry in request_json['data']:
                 place_id = badge_entry['awarder']['id']
                 badge_id = badge_entry['id']
-                k = [key for key, s in PLACE_SPAM.items() if place_id in s]
-                if k:
-                    logging.info(f"Badge: {badge_id} | Place: {place_id} (from: {', '.join(k)})")
-                    FOUND_PLACES.add(place_id)
-
-                k = [key for key, s in BADGE_SPAM.items() if badge_id in s]
-                if k:
-                    logging.info(f"Badge: {badge_id} | Place: {place_id} (from: {', '.join(k)})")
-                    FOUND_BADGES.add(badge_id)
+                if not place_id in FOUND_PLACES:
+                    p = [key for key, s in PLACE_SPAM.items() if place_id in s]
+                    if p:
+                        logging.info(f"Badge: {badge_id} | Place: {place_id} (from: {', '.join(p)})")
+                        FOUND_PLACES.add(place_id)
+                        _save_lists(place_id, R_Type.PLACE)
+                if not badge_id in FOUND_BADGES:
+                    b = [key for key, s in BADGE_SPAM.items() if badge_id in s]
+                    if b:
+                        logging.info(f"Badge: {badge_id} | Place: {place_id} (from: {', '.join(b)})")
+                        FOUND_BADGES.add(badge_id)
+                        _save_lists(badge_id, R_Type.BADGE)
 
             print(f"Found {len(FOUND_PLACES)} place(s), {len(FOUND_BADGES)} badge(s).")
-
-            # save badge inventory data
-            data_save.save_data(request_json, f"badge_inventory/{user_id}_{pageNum}.json")
 
             if request_json['nextPageCursor'] is None:
                 print("Searched all badges.")

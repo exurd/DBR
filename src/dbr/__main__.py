@@ -139,15 +139,10 @@ def main(args=None):
         sys.exit(0)
 
     if args.check_inventory:
-        from .modules.spam_scanner import create_spam_list, convert_to_frozensets, create_folder, scan_inventory
-        if create_spam_list():
-            create_folder(args.check_inventory)
-            convert_to_frozensets()
-            
-            badges, places = scan_inventory(args.check_inventory)
-            data_save.save_data(list(badges), f"spambadges_{str(args.check_inventory)}.json")
-            data_save.save_data(list(places), f"spamplaces_{str(args.check_inventory)}.json")
-        sys.exit(0)
+        from .modules.spam_scanner import scan_inventory
+        if scan_inventory(args.check_inventory):
+            sys.exit(0)
+        sys.exit(1)
 
     user_agent = args.user_agent
     rbx_token = args.rbx_token
