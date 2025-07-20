@@ -1,9 +1,9 @@
+from dotenv import load_dotenv
+from importlib import metadata
+import argparse
 import os
 import sys
-import argparse
-from importlib import metadata
 
-from dotenv import load_dotenv
 from .modules import data_save
 
 __prog__ = "Dumb Badge(s) Remover"

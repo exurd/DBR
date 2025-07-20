@@ -1,12 +1,12 @@
-from urllib.parse import unquote, urlparse
 from pathlib import PurePosixPath
-import time
+from urllib.parse import unquote, urlparse
 import concurrent.futures
-import threading
 import math
 import random
-import traceback
 import requests
+import threading
+import time
+import traceback
 
 from . import data_save
 from .get_request_url import get_request_url

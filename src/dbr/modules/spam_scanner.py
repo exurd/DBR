@@ -1,11 +1,11 @@
-import time
+import logging
 import os
 import re
-import logging
+import time
 
 from . import data_save
-from .get_request_url import get_request_url
 from .badge_spam_list import zstd_extract_lines
+from .get_request_url import get_request_url
 
 # i made a mistake while creating the spam lists...
 # some lists don't have `www.` so pattern `(?:www\.)?`

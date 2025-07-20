@@ -1,6 +1,6 @@
-import os
 from zipfile import ZipFile, BadZipFile
 import io
+import os
 
 from .get_request_url import get_request_url
 
