@@ -80,6 +80,11 @@ To be able to delete badges, you will need to authenticate yourself with a ROBLO
 
 Once you have your token, add the argument `--rbx-token [TOKEN]` to your command.
 
-For better safety, you can use .env files to avoid leaks. Use `.example_env` as a starting point. Copy the file and rename it it `.env`. Paste the ROBLOSECURITY token into this line: `ROBLOXTOKEN="[TOKEN HERE]"`. Use the argument `--env-file [.env file]`. 
+For better safety, you can use .env files to avoid leaks. The `.example_env` in this repository can be used as a starting point. Copy the file and rename it it `.env`. Paste the ROBLOSECURITY token into this line: `ROBLOXTOKEN="[TOKEN HERE]"`. Use the argument `--env-file [.env file]`. 
+
+# Downloading lists
+There are two commands for downloading lists for this program; `--download-mgs-invalid-list` and `--download-badge-spam-lists`. The first command downloads a list of games that are considered spam by MetaGamerScore. The other command downloads multiple text files from [exurd/badge-spam-lists](https://github.com/exurd/badge-spam-lists).
+
+To delete badges from games in a text file, use the `--file` command with the path to the file.
 
 *This project has been licensed with the MIT License.*
