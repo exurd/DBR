@@ -5,7 +5,7 @@ import concurrent.futures
 import threading
 import math
 import random
-
+import traceback
 import requests
 
 from . import data_save
@@ -67,16 +67,22 @@ def init(user_agent=None, rbx_token=None):
     if rbx_token is not None:
         requestSession.cookies[".ROBLOSECURITY"] = str(rbx_token)
     else:
-        print("Roblox Token was not specified, exiting.")
+        print("Roblox Token was not specified.")
         return False
 
-    requestSession.headers["X-CSRF-Token"] = validate_csrf()
+    try:
+        requestSession.headers["X-CSRF-Token"] = validate_csrf()
+    except Exception as e:
+        print(f"\nFailed to get CSRF token: {e}")
+        print(traceback.format_exc())
+        print("Cannot proceed without it.")
+        return False
 
     USER_ID = get_user_from_token()
     if USER_ID is not None:
         USER_ID = USER_ID["id"]
     else:
-        print("The User ID could not be found. Please check if the specified Roblox token is correct. Exiting.")
+        print("The User ID could not be found from the token. Please check if the specified Roblox token is correct.")
         return False
     return True
 

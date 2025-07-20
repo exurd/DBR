@@ -171,6 +171,7 @@ def main(args=None):
 
     from .modules import remover
     if remover.init(user_agent, rbx_token) is False:
+        print("Exiting.")
         sys.exit(1)
 
     if args.badge is not None:
