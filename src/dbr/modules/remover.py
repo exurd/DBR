@@ -50,8 +50,7 @@ def validate_csrf() -> str:
     """
     Gets X-CSRF-Token for Roblox.
     """
-    requestSession.headers["X-CSRF-Token"] = None
-    req = requestSession.post(url="https://auth.roblox.com/v2/logout", timeout=60)
+    req = requests.post(url="https://auth.roblox.com/v2/logout", timeout=60)
     return req.headers["X-CSRF-Token"]
 
 
