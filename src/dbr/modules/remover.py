@@ -3,6 +3,7 @@ from urllib.parse import unquote, urlparse
 import concurrent.futures
 import math
 import random
+import re
 import requests
 import threading
 import time
@@ -10,6 +11,13 @@ import traceback
 
 from . import data_save
 from .get_request_url import get_request_url
+
+
+# i made a mistake while creating the spam lists...
+# some lists don't have `www.` so pattern `(?:www\.)?`
+# is needed to avoid issues
+# using .findall[0] will return a tuple of (TYPE, ID)
+ROBLOX_URL_PATTERN = re.compile(r"https?:\/\/(?:www\.)?roblox\.com\/([A-Za-z]+)\/([0-9]+)")
 
 
 print_lock = threading.Lock()
@@ -378,31 +386,32 @@ def delete_from_text_file(lines):
     """
     for line in lines:
         url = line.strip()
-        # print(url)
-        check = PurePosixPath(unquote(urlparse(url).path)).parts
 
-        if check[1] == "badges":  # if a badge then use that to check
-            badge_id = int(check[2])
+        if ROBLOX_URL_PATTERN.match(url):
+            check = ROBLOX_URL_PATTERN.findall(url)[0]
 
-            user_check = get_request_url(f"https://inventory.roblox.com/v1/users/{str(USER_ID)}/items/2/{str(badge_id)}/is-owned", requestSession=requestSession)
-            if user_check.text == "true":
-                delete_badge(badge_id)
+            if str.lower(check[0]) == "badges":
+                badge_id = int(check[1])
 
-        elif check[1] == "games":
-            place_id = int(check[2])
+                user_check = get_request_url(f"https://inventory.roblox.com/v1/users/{str(USER_ID)}/items/2/{str(badge_id)}/is-owned", requestSession=requestSession)
+                if user_check.text == "true":
+                    delete_badge(badge_id)
 
-            if place_id in data_save.CHECKED_PLACES:
-                print("Already checked place, skipping...")
-                continue
+            elif str.lower(check[0]) == "games":
+                place_id = int(check[1])
 
-            delete_from_game(place_id)
+                if place_id in data_save.CHECKED_PLACES:
+                    print("Already checked place, skipping...")
+                    continue
 
-            data_save.CHECKED_PLACES.append(place_id)
-            data_save.save_data(data_save.CHECKED_PLACES, "checked_places.json")
+                delete_from_game(place_id)
 
-        elif check[1] == "users":
-            player_id = int(check[2])
+                data_save.CHECKED_PLACES.append(place_id)
+                data_save.save_data(data_save.CHECKED_PLACES, "checked_places.json")
 
-            delete_from_player(player_id)
+            elif str.lower(check[0]) == "users":
+                player_id = int(check[1])
 
-        time.sleep(3)
+                delete_from_player(player_id)
+
+            time.sleep(3)

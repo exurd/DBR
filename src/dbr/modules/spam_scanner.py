@@ -1,16 +1,11 @@
 import logging
 import os
-import re
 import time
 
 from . import data_save
 from .badge_spam_list import zstd_extract_lines
 from .get_request_url import get_request_url
-
-# i made a mistake while creating the spam lists...
-# some lists don't have `www.` so pattern `(?:www\.)?`
-# is needed to avoid issues
-roblox_pattern = re.compile(r"https:\/\/(?:www\.)?roblox\.com\/games\/([0-9]+)")
+from .remover import ROBLOX_URL_PATTERN
 
 PLACE_SPAM = {}
 BADGE_SPAM = {}
@@ -66,7 +61,8 @@ def create_spam_list(folder=os.getcwd()):
                 path = os.path.join(badge_spam_list_folder, filename)
                 if lines := zstd_extract_lines(path):
                     l = []
-                    [l.append(int(roblox_pattern.findall(line)[0])) for line in lines]
+                    # this pattern creates a tuple of the type and id, so we need to specify we want the second item
+                    [l.append(int(ROBLOX_URL_PATTERN.findall(line)[0][1])) for line in lines]
                     PLACE_SPAM[filename] = l
 
         data_save.save_data(PLACE_SPAM, "spam_places_list.json")
