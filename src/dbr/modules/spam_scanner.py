@@ -50,7 +50,6 @@ def create_spam_list(folder=os.getcwd()):
     global PLACE_SPAM
     global BADGE_SPAM
 
-    # TODO: allow scan to be tracked back to it's roots (or multiple roots)...
     print("Creating list of spam place IDs...")
     try:
         mgs_invalid_games_json = os.path.join(folder, "mgs_invalid_games.json")
@@ -157,9 +156,9 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
     else:
         url_request = f"https://badges.roblox.com/v1/users/{user_id}/badges?limit=100&cursor={page_cursor}&sortOrder=Asc"
     while True:
-        print("\n---")
+        print("\n")
         print(f"Next page ({str(pageNum)})...")
-        print("---\n")
+        print("---")
         req = get_request_url(url_request)
 
         if req.ok:
@@ -177,12 +176,14 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
                 if not place_id in FOUND_PLACES:
                     p = [key for key, s in PLACE_SPAM.items() if place_id in s]
                     if p:
+                        print(f"Place {place_id} found in {p}")
                         logging.info(f"Badge: {badge_id} | Place: {place_id} (from: {', '.join(p)})")
                         FOUND_PLACES.add(place_id)
                         _save_lists(place_id, R_Type.PLACE)
                 if not badge_id in FOUND_BADGES:
                     b = [key for key, s in BADGE_SPAM.items() if badge_id in s]
                     if b:
+                        print(f"Badge {badge_id} found in {b}")
                         logging.info(f"Badge: {badge_id} | Place: {place_id} (from: {', '.join(b)})")
                         FOUND_BADGES.add(badge_id)
                         _save_lists(badge_id, R_Type.BADGE)
