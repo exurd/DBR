@@ -11,60 +11,72 @@ Install the program with pip by running `pip install git+https://github.com/exur
 
 To use the program, run `python -m dbr [COMMAND]` or `dbr [COMMAND]`. Adding `-h` will give you the full arguments you can use.
 ```
-usage: Dumb Badge(s) Remover [-h]
-                             [--version]
-                             [--file FILE]
-                             [--badge BADGE_ID]
-                             [--place PLACE_ID]
-                             [--user USER_ID]
-                             [--group GROUP_ID]
-                             [--mgs-id MGS_ID]
-                             [--env-file ENV_FILE]
-                             [--rbx-token RBX_TOKEN]
+usage: Dumb Badge(s) Remover [-h] [--version] [--file FILE] [--badge BADGE_ID]
+                             [--place PLACE_ID] [--user USER_ID]
+                             [--group GROUP_ID] [--mgs-id MGS_ID]
+                             [--env-file ENV_FILE] [--rbx-token RBX_TOKEN]
                              [--download-mgs-invalid-list]
                              [--download-badge-spam-lists]
+                             [--use-bor-badge-database]
                              [--check-inventory USER_ID]
                              [--cache-directory CACHE_DIRECTORY]
+                             [--delete-threads NUM_THREADS]
                              [--user-agent USER_AGENT]
 
 Removes Roblox badges very quickly
 
-There are 14 arguments available.
+There are 16 arguments available.
 
 options:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
-  --file FILE           Filename path with 'https://roblox.com/[TYPE]/[ID]' urls you want gone from your account.
+  --file FILE           Filename path with 'https://roblox.com/[TYPE]/[ID]'
+                        urls you want gone from your account.
   --badge, -b BADGE_ID  Specify a badge ID you want gone from your account.
   --place, -p PLACE_ID  Specify a place ID you want gone from your account.
   --user, -u USER_ID    Specify a user ID you want gone from your account.
   --group, -g, --community GROUP_ID
-                        Specify a group / community ID you want gone from your account.
-  --mgs-id MGS_ID       Specify a MetaGamerScore game ID you want gone from your account.
+                        Specify a group / community ID you want gone from your
+                        account.
+  --mgs-id MGS_ID       Specify a MetaGamerScore game ID you want gone from
+                        your account.
   --env-file, -e ENV_FILE
                         An .env file allows you to specify settings (the below
                         options) for Dumb Badge(s) Remover to follow without
-                        cluttering the terminal or risking important tokens. More
-                        information on .env files can be found in the README.
+                        cluttering the terminal or risking important tokens.
+                        More information on .env files can be found in the
+                        README.
   --rbx-token, -t RBX_TOKEN
-                        .ROBLOSECURITY token. By using this option, you agree that
-                        this is your unique token and not anyone else's. DO NOT
-                        SHARE YOUR ROBLOX TOKEN WITH ANYONE! More info can be found
-                        here: https://ro.py.jmk.gg/dev/tutorials/roblosecurity/
+                        .ROBLOSECURITY token. By using this option, you agree
+                        that this is your unique token and not anyone else's.
+                        DO NOT SHARE YOUR ROBLOX TOKEN WITH ANYONE! More info
+                        can be found here:
+                        https://ro.py.jmk.gg/dev/tutorials/roblosecurity/
   --download-mgs-invalid-list
-                        Download MetaGamerScore's list of Roblox games that were
-                        detected as problematic. May contain games that are not
-                        considered spam, so use with caution.
+                        Download MetaGamerScore's list of Roblox games that
+                        were detected as problematic. May contain games that
+                        are not considered spam, so use with caution.
   --download-badge-spam-lists
-                        Download text files from exurd/badge-spam-lists; a bunch of
-                        text files containing place IDs from various Roblox badge
-                        chains.
+                        Download text files from exurd/badge-spam-lists; a
+                        bunch of text files containing place IDs from various
+                        Roblox badge chains.
+  --use-bor-badge-database
+                        Tell DBR to instead use the Badgers of Robloxia's
+                        Valuable Badge Database to view badges in a universe.
+                        Useful for disabled badges, which are hidden when
+                        checking universes via the Roblox API. NOTE: Requests
+                        for this API can take a long time to complete. It is
+                        recommended to instead use the inventory scanner to
+                        find hidden badges that you have collected.
   --check-inventory, -c USER_ID
-                        Checks a user's inventory for spam badges. DOES NOT DELETE
-                        BADGES. Requires a list of place IDs to check (use download
-                        arguments above).
+                        Checks a user's inventory for spam badges. DOES NOT
+                        DELETE BADGES. Requires a list of place IDs to check
+                        (use download arguments above).
   --cache-directory, -cd CACHE_DIRECTORY
                         The directory where cache data is kept.
+  --delete-threads NUM_THREADS
+                        Sets how many concurrent threads used when deleting
+                        multiple badges.
   --user-agent, -ua USER_AGENT
                         Sets the user agent for requests made by the program.
 ```
