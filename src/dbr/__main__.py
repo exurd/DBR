@@ -74,20 +74,34 @@ def get_parser() -> argparse.ArgumentParser:
 
     # related to roblox account authentication
     parser.add_argument("--env-file", "-e", default=None,  # type=argparse.FileType("w"),
-                        help=f"An .env file allows you to specify settings (the below options) for {parser.prog} to follow without cluttering the terminal or risking important tokens. More information on .env files can be found in the README.")
+                        help=f"""An .env file allows you to specify settings
+                              (the below options) for {parser.prog} to follow
+                              without cluttering the terminal or risking
+                              important tokens. More information on .env files
+                              can be found in the README.""")
     parser.add_argument("--rbx-token", "-t", default=None,
-                        help=".ROBLOSECURITY token. By using this option, you agree that this is your unique token and not anyone else's. DO NOT SHARE YOUR ROBLOX TOKEN WITH ANYONE! More info can be found here: https://ro.py.jmk.gg/dev/tutorials/roblosecurity/")
+                        help=""".ROBLOSECURITY token. By using this option, you
+                             agree that this is your unique token and not anyone
+                             else's. DO NOT SHARE YOUR ROBLOX TOKEN WITH ANYONE!
+                             More info can be found here:
+                             https://ro.py.jmk.gg/dev/tutorials/roblosecurity/""")
 
     # related to downloading lists
     parser.add_argument("--download-mgs-invalid-list", action="store_true",
-                        help="Download MetaGamerScore's list of Roblox games that were detected as problematic. May contain games that are not considered spam, so use with caution.")
+                        help="""Download MetaGamerScore's list of Roblox games
+                             that were detected as problematic. May contain
+                             games that are not considered spam, so use with
+                             caution.""")
     parser.add_argument("--download-badge-spam-lists", action="store_true",
-    help="Download text files from exurd/badge-spam-lists; a bunch of text files containing place IDs from various Roblox badge chains.")
+                        help="""Download text files from exurd/badge-spam-lists;
+                             a bunch of text files containing place IDs from
+                             various Roblox badge chains.""")
 
     # related to inventory scanning
     parser.add_argument("--check-inventory", "-c", type=int, default=None, metavar="USER_ID",
-                        help="Checks a user's inventory for spam badges. DOES NOT DELETE BADGES. "
-                        "Requires a list of place IDs to check (use download arguments above).")
+                        help="""Checks a user's inventory for spam badges. DOES
+                             NOT DELETE BADGES. Requires a list of place IDs to
+                             check (use download arguments above).""")
 
     # misc.
     parser.add_argument("--cache-directory", "-cd", default=os.path.join(base_cache_path, "dbr_cache"),
