@@ -99,4 +99,12 @@ There are two commands for downloading lists for this program; `--download-mgs-i
 
 To delete badges from games in a text file, use the `--file` command with the path to the file. Make sure it ends with `.txt` and not `.json`!
 
+# Scanning inventories
+With the `-- check-inventory` option, you can scan any public inventory for spam badges. It will use any lists downloaded via the above commands. It can then be used to gauge how many spam badges a user has.
+
+Two text files will be created; one for places and one for badges. Each place found in the places list will have the name in the URL. For the badge list, only the 
+
+> [!CAUTION]
+> Check the results of the scan before using them to remove badges, especially if you have downloaded the MGS spam list; false positives have been known to show up there.
+
 *This project has been licensed with the MIT License.*
