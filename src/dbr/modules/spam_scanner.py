@@ -130,7 +130,7 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
     create_folder(scanfolder_name)
 
 
-    def _save_lists(id, type, folder=os.getcwd()):
+    def _save_lists(id, type:R_Type, folder=os.getcwd()):
         """
         Saves a list of Roblox URLs, which can then
         be used in DBR to delete the badges from
@@ -140,7 +140,7 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
         will most likely want to see the results there.
         """
         try:
-            filename = os.path.join(folder, f"{scanfolder_name}.txt")
+            filename = os.path.join(folder, f"{scanfolder_name}_{type.upper()}.txt")
 
             url = f"https://www.roblox.com/{type}/{str(id)}"
             head = get_request_url(url, headers_only=True, accept_redirects=True, accept_forbidden=True, accept_not_found=True)
@@ -180,18 +180,27 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
             for badge_entry in request_json['data']:
                 place_id = badge_entry['awarder']['id']
                 badge_id = badge_entry['id']
+                p = b = False
                 if not place_id in FOUND_PLACES:
                     p = [key for key, s in PLACE_SPAM.items() if place_id in s]
-                    if p:
-                        print(f"Place {place_id} found in {p}")
-                        logging.info(f"Badge: {badge_id} | Place: {place_id} (from: {', '.join(p)})")
-                        FOUND_PLACES.add(place_id)
-                        _save_lists(place_id, R_Type.PLACE)
+                else:
+                    # add badges from games that are in FOUND_PLACES
+                    FOUND_BADGES.add(badge_id)
+                    _save_lists(badge_id, R_Type.BADGE)
                 if not badge_id in FOUND_BADGES:
                     b = [key for key, s in BADGE_SPAM.items() if badge_id in s]
+                if p or b:
+                    if p:
+                        print(f"Place {place_id} found in {p}")
                     if b:
                         print(f"Badge {badge_id} found in {b}")
-                        logging.info(f"Badge: {badge_id} | Place: {place_id} (from: {', '.join(b)})")
+                    logging.info(f"Badge: {badge_id} | Place: {place_id} (from: {', '.join(p)})")
+
+                    if not place_id in FOUND_PLACES:
+                        FOUND_PLACES.add(place_id)
+                        _save_lists(place_id, R_Type.PLACE)
+
+                    if not badge_id in FOUND_BADGES:
                         FOUND_BADGES.add(badge_id)
                         _save_lists(badge_id, R_Type.BADGE)
 
