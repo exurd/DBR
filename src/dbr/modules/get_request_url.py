@@ -4,7 +4,7 @@ import requests
 import time
 
 
-def get_request_url(url, requestSession=None, retry_amount=8, accept_forbidden=False, accept_not_found=True, initial_wait_time=None) -> requests.Response:
+def get_request_url(url, requestSession=None, retry_amount=8, accept_redirects=False, accept_forbidden=False, accept_not_found=True, initial_wait_time=None, headers_only=False) -> requests.Response:
     """
     Internal function to request urls.
     """
@@ -25,15 +25,20 @@ def get_request_url(url, requestSession=None, retry_amount=8, accept_forbidden=F
             print(f"Attempt {tries}...")
         tries += 1
         try:
-            response = requestSession.get(url)
+            if headers_only:
+                response = requestSession.head(url)
+            else:
+                response = requestSession.get(url)
             print(f"Response Status Code: {response.status_code}")
             sc = response.status_code
             if sc in (200, 302):
                 return response
+            if accept_redirects and sc == 301:
+                return response  # Moved Permanently (if accept_moved)
             if accept_forbidden and sc == 403:
-                return response  # Forbidden (if acceptForbidden)
+                return response  # Forbidden (if accept_forbidden)
             if accept_not_found and sc == 404:
-                return response  # Not Found (if acceptNotFound)
+                return response  # Not Found (if accept_not_found)
             if sc == 410:
                 return response  # Gone
             response.raise_for_status()
