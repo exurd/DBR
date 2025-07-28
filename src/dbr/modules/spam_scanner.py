@@ -130,7 +130,7 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
     create_folder(scanfolder_name)
 
 
-    def _save_lists(id, type:R_Type, folder=os.getcwd()):
+    def _save_lists(id, type:R_Type, folder=os.getcwd(), so_no_head=False):
         """
         Saves a list of Roblox URLs, which can then
         be used in DBR to delete the badges from
@@ -138,15 +138,17 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
 
         `folder` is current working directory as users
         will most likely want to see the results there.
+
+        so_no_head set to True will not request a HEAD.
         """
         try:
             filename = os.path.join(folder, f"{scanfolder_name}_{type.upper()}.txt")
 
             url = f"https://www.roblox.com/{type}/{str(id)}"
-            head = get_request_url(url, headers_only=True, accept_redirects=True, accept_forbidden=True, accept_not_found=True)
-
-            if head.is_redirect and head.headers["location"]:
-                url = f"https://www.roblox.com{head.headers["location"]}"
+            if not so_no_head:
+                head = get_request_url(url, headers_only=True, accept_redirects=True, accept_forbidden=True, accept_not_found=True)
+                if head.is_redirect and head.headers["location"]:
+                    url = f"https://www.roblox.com{head.headers["location"]}"
 
             with open(filename, "a", encoding="utf-8") as f:
                 f.write(f"{url}\n")
@@ -185,8 +187,10 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
                     p = [key for key, s in PLACE_SPAM.items() if place_id in s]
                 else:
                     # add badges from games that are in FOUND_PLACES
+                    # do not get their name as there could be thousands
+                    # (if not millions) of these in an inventory
                     FOUND_BADGES.add(badge_id)
-                    _save_lists(badge_id, R_Type.BADGE)
+                    _save_lists(badge_id, R_Type.BADGE, so_no_head=True)
                 if not badge_id in FOUND_BADGES:
                     b = [key for key, s in BADGE_SPAM.items() if badge_id in s]
                 if p or b:
