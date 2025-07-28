@@ -117,6 +117,9 @@ def get_parser() -> argparse.ArgumentParser:
     # misc.
     parser.add_argument("--cache-directory", "-cd", default=os.path.join(base_cache_path, "dbr_cache"),
                         help="The directory where cache data is kept.")
+    
+    parser.add_argument("--delete-threads", type=int, default=2, metavar="NUM_THREADS",
+                        help="Sets how many concurrent threads used when deleting multiple badges.")
 
     parser.add_argument("--user-agent", "-ua", default=f"{__prg__}/{__version__}",
                         help="Sets the user agent for requests made by the program.")
@@ -195,7 +198,8 @@ def main(args=None):
         sys.exit(1)
     
     remover.init_variables(
-        use_bor=args.use_bor_badge_database
+        use_bor=args.use_bor_badge_database,
+        thread_count=args.delete_threads
     )
 
     if args.badge is not None:

@@ -30,19 +30,22 @@ def print_thread_safe(message):
         print(message)
 
 
-NUM_THREADS = 2  # TODO: turn into argument
+NUM_THREADS = 2
 USE_BOR_UNIVERSE_API = False
 
 
-def init_variables(use_bor=False):
+def init_variables(use_bor=False, thread_count=2):
     """
     Because refactoring functions is hard enough
     """
     global USE_BOR_UNIVERSE_API
+    global NUM_THREADS
 
     USE_BOR_UNIVERSE_API = bool(use_bor)
     if USE_BOR_UNIVERSE_API:
         print("Using BoR Database API; requests may take a long time to be processed...")
+
+    NUM_THREADS = int(thread_count)
 
 
 requestSession = requests.Session()
