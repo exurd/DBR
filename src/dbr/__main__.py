@@ -97,6 +97,17 @@ def get_parser() -> argparse.ArgumentParser:
                              a bunch of text files containing place IDs from
                              various Roblox badge chains.""")
 
+    # related to bor api usage
+    parser.add_argument("--use-bor-badge-database", action="store_true",
+                        help=f"""Tell {__prg__} to instead use the Badgers of
+                        Robloxia's Valuable Badge Database to view badges in a
+                        universe. Useful for disabled badges, which are hidden
+                        when checking universes via the Roblox API.
+
+                        NOTE: Requests for this API can take a long time to
+                        complete. It is recommended to instead use the inventory
+                        scanner to find hidden badges that you have collected.""")
+
     # related to inventory scanning
     parser.add_argument("--check-inventory", "-c", type=int, default=None, metavar="USER_ID",
                         help="""Checks a user's inventory for spam badges. DOES
@@ -179,9 +190,13 @@ def main(args=None):
         parser.error("the following arguments are required to continue: --file, --user, --group, --place, --badge or --mgs-id")
 
     from .modules import remover
-    if remover.init(user_agent, rbx_token) is False:
+    if remover.init_request_session(user_agent, rbx_token) is False:
         print("Exiting.")
         sys.exit(1)
+    
+    remover.init_variables(
+        use_bor=args.use_bor_badge_database
+    )
 
     if args.badge is not None:
         remover.delete_badge(args.badge)

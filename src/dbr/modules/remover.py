@@ -11,6 +11,7 @@ import traceback
 
 from . import data_save
 from .get_request_url import get_request_url
+from .bor_database_handler import get_bor_universe_info
 
 
 # i made a mistake while creating the spam lists...
@@ -29,7 +30,19 @@ def print_thread_safe(message):
         print(message)
 
 
-NUM_THREADS = 2
+NUM_THREADS = 2  # TODO: turn into argument
+USE_BOR_UNIVERSE_API = False
+
+
+def init_variables(use_bor=False):
+    """
+    Because refactoring functions is hard enough
+    """
+    global USE_BOR_UNIVERSE_API
+
+    USE_BOR_UNIVERSE_API = bool(use_bor)
+    if USE_BOR_UNIVERSE_API:
+        print("Using BoR Database API; requests may take a long time to be processed...")
 
 
 requestSession = requests.Session()
@@ -63,7 +76,7 @@ def validate_csrf() -> str:
     return req.headers["X-CSRF-Token"]
 
 
-def init(user_agent=None, rbx_token=None):
+def init_request_session(user_agent=None, rbx_token=None):
     """
     Initializes the request session with user agent and cookies.
     """
@@ -155,6 +168,40 @@ def delete_request_url(url, retry_amount=8, accept_forbidden=False, accept_not_f
     return False
 
 
+# https://stackoverflow.com/a/312464
+def _chunks(lst, n):
+    """
+    Yield successive n-sized chunks from lst.
+    """
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+
+def check_badges_in_inventory(badges, badge_list=[], retry_amount=2):
+    """
+    Checks user inventory for a list of badges.
+    """
+    badges = list(set(badges))  # dedupe list
+    if len(badges) > 100:
+        for b_chunk in _chunks(badges, 100):
+            badge_list = [*badge_list, *check_badges_in_inventory(b_chunk)]
+        return badge_list
+
+    for _ in range(retry_amount):
+        badge_check = get_request_url(f"https://badges.roblox.com/v1/users/{str(USER_ID)}/badges/awarded-dates?badgeIds={','.join(badges)}", requestSession=requestSession)  # shows awarded badges en masse; easy!
+        if badge_check.ok:
+            badge_check = badge_check.json()
+            if badge_check["data"] == []:
+                return []
+
+            for badge in badge_check['data']:
+                badge_id = badge['badgeId']
+                badge_list.append(badge_id)
+            return badge_list
+        time.sleep(3)
+    return []
+
+
 def delete_badge(badge_id):
     """
     Deletes badge from user's inventory.
@@ -197,6 +244,12 @@ def delete_badge(badge_id):
         attempts += 1
 
 
+def batch_delete_badges(badges=[]):
+    if badges != []:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
+            executor.map(delete_badge, badges)
+
+
 def delete_from_game(place_id):
     """
     Collects badges from a place ID, checks which were awarded to
@@ -213,6 +266,18 @@ def delete_from_game(place_id):
             universe_id = uni_json['universeId']
 
             print("Searching universe's badges...")
+
+            if USE_BOR_UNIVERSE_API:
+                bor_info = get_bor_universe_info(universe_id)
+                if bor_info == []:
+                    return False
+
+                badges = bor_info["data"][0]["badges"]  # why is it like this?
+                badges = [id for id in badges]
+                awarded_badges = check_badges_in_inventory(badges)
+                batch_delete_badges(awarded_badges)
+                return True
+
             universebadges_req = get_request_url(f"https://badges.roblox.com/v1/universes/{str(universe_id)}/badges?limit=100&sortOrder=Asc", requestSession=requestSession)
             if universebadges_req.ok:
                 universebadges_json = universebadges_req.json()
@@ -234,27 +299,14 @@ def delete_from_game(place_id):
                     if badge_check_list == []:
                         nobadgestoremove = True
                     else:
-                        while True:
-                            badge_check = get_request_url(f"https://badges.roblox.com/v1/users/{str(USER_ID)}/badges/awarded-dates?badgeIds={','.join(badge_check_list)}", requestSession=requestSession)  # shows awarded badges en masse; easy!
-                            print(badge_check)
-                            if badge_check.ok:
-                                badge_check = badge_check.json()
-                                break
-                            time.sleep(3)
-                        if badge_check['data'] == []:
+                        awarded_badges = check_badges_in_inventory(badge_check_list)
+                        if awarded_badges == []:
                             nobadgestoremove = True
 
                     if nobadgestoremove is False:
-                        badge_delete_list = []
-                        for badge in badge_check['data']:
-                            badge_id = badge['badgeId']
-                            badge_delete_list.append(badge_id)
-
                         print(f"|----||{str(page_count)}||----|")
 
-                        # delete_badge(badgeId)
-                        with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
-                            executor.map(delete_badge, badge_delete_list)
+                        batch_delete_badges(awarded_badges)
 
                         print(f"|----||{str(page_count)}||----|")
 
