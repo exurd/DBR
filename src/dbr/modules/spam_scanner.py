@@ -149,7 +149,7 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
                 head = get_request_url(url, headers_only=True, accept_redirects=True, accept_forbidden=True, accept_not_found=True)
                 if head.ok:
                     if head.is_redirect and head.headers["location"]:
-                        url = f"https://www.roblox.com{head.headers["location"]}"
+                        url = f"https://www.roblox.com{head.headers['location']}"
 
             with open(filename, "a", encoding="utf-8") as f:
                 f.write(f"{url}\n")
