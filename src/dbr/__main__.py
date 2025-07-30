@@ -14,7 +14,7 @@ try:
 except metadata.PackageNotFoundError:
     __version__ = "dev"  # fallback version
 __author__ = "exurd"
-__copyright__ = "copyright (c) 2025, exurd"
+__copyright__ = "copyright (c) 2023, 2025 exurd"
 __credits__ = ["exurd"]
 __license__ = "MIT"
 __long_license__ = """
