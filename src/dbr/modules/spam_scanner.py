@@ -7,7 +7,7 @@ import time
 from . import data_save
 from .badge_spam_list import zstd_extract_lines
 from .get_request_url import get_request_url
-from .remover import ROBLOX_URL_PATTERN
+from .remover import ROBLOX_URL_PATTERN, requestSession
 
 PLACE_SPAM = {}
 BADGE_SPAM = {}
@@ -171,7 +171,7 @@ def scan_inventory(user_id:int, page_cursor=None, page_count=1) -> tuple[set, se
         print("\n")
         print(f"Next page ({str(pageNum)})...")
         print("---")
-        req = get_request_url(url_request)
+        req = get_request_url(url_request, requestSession=requestSession)
 
         if req.ok:
             request_json = req.json()

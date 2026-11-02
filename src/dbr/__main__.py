@@ -14,7 +14,7 @@ try:
 except metadata.PackageNotFoundError:
     __version__ = "dev"  # fallback version
 __author__ = "exurd"
-__copyright__ = "copyright (c) 2023, 2025 exurd"
+__copyright__ = "copyright (c) 2023, 2025-2026 exurd"
 __credits__ = ["exurd"]
 __license__ = "MIT"
 __long_license__ = """
@@ -166,12 +166,6 @@ def main(args=None):
         download_spam_lists()
         sys.exit(0)
 
-    if args.check_inventory:
-        from .modules.spam_scanner import scan_inventory
-        if scan_inventory(args.check_inventory):
-            sys.exit(0)
-        sys.exit(1)
-
     user_agent = args.user_agent
     rbx_token = args.rbx_token
 
@@ -189,12 +183,18 @@ def main(args=None):
     if all(val is None for val in [args.rbx_token, args.env_file]):
         parser.error("the following arguments are required to continue: --rbx-token or --env-file containing `RBX_TOKEN=`")
 
-    if all(val is None for val in [args.file, args.user, args.group, args.place, args.badge, args.mgs_id]):
-        parser.error("the following arguments are required to continue: --file, --user, --group, --place, --badge or --mgs-id")
+    if all(val is None for val in [args.file, args.user, args.group, args.place, args.badge, args.mgs_id, args.check_inventory]):
+        parser.error("the following arguments are required to continue: --file, --user, --group, --place, --badge, --mgs-id or --check-inventory")
 
     from .modules import remover
     if remover.init_request_session(user_agent, rbx_token) is False:
         print("Exiting.")
+        sys.exit(1)
+
+    if args.check_inventory:
+        from .modules.spam_scanner import scan_inventory
+        if scan_inventory(args.check_inventory):
+            sys.exit(0)
         sys.exit(1)
     
     remover.init_variables(
